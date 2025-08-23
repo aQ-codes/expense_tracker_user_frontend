@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
-import "../themes/styles/globals.scss";
+import localFont from "next/font/local";
+import "@/themes/styles/globals.css";
 
+const geistSans = localFont({
+  src: "../themes/fonts/Rubik.ttf",
+  variable: "--font-rubik",
+  weight: "100 900",
+});
 
 
 export const metadata: Metadata = {
@@ -18,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body >
+      <body className={`${geistSans.variable}`}>
         {children}
       </body>
     </html>
