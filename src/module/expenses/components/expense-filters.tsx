@@ -1,13 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-
-interface Category {
-  id: string;
-  name: string;
-  color: string;
-  icon: React.ReactNode;
-}
+import { Category } from '@/interfaces/expense';
+import { MONTHS } from '../constants';
 
 interface ExpenseFiltersProps {
   categories: Category[];
@@ -28,22 +23,6 @@ const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
 }) => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isMonthOpen, setIsMonthOpen] = useState(false);
-
-  const months = [
-    { value: '', label: 'All Months' },
-    { value: '01', label: 'January' },
-    { value: '02', label: 'February' },
-    { value: '03', label: 'March' },
-    { value: '04', label: 'April' },
-    { value: '05', label: 'May' },
-    { value: '06', label: 'June' },
-    { value: '07', label: 'July' },
-    { value: '08', label: 'August' },
-    { value: '09', label: 'September' },
-    { value: '10', label: 'October' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'December' },
-  ];
 
   const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
 
@@ -111,7 +90,7 @@ const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-left flex items-center justify-between hover:border-gray-300 transition-colors"
         >
           <span className={selectedMonth ? 'text-gray-900' : 'text-gray-500'}>
-            {selectedMonth ? months.find(m => m.value === selectedMonth)?.label : 'Filter by Month'}
+            {selectedMonth ? MONTHS.find(m => m.value === selectedMonth)?.label : 'Filter by Month'}
           </span>
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -121,7 +100,7 @@ const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
         {isMonthOpen && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
             <div className="p-2">
-              {months.map((month) => (
+              {MONTHS.map((month) => (
                 <button
                   key={month.value}
                   onClick={() => {

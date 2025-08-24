@@ -3,7 +3,7 @@
 import React from 'react';
 import CustomModal from '../../../themes/components/custom-modal';
 import ExpenseForm from './expense-form';
-import { Category, Expense } from '../../../interfaces/expense';
+import { Category, Expense } from '@/interfaces/expense';
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface ExpenseModalProps {
   expense?: Expense | null;
   categories: Category[];
   mode: 'add' | 'edit';
+  onCategoryCreated?: (newCategory: Category) => void;
 }
 
 const ExpenseModal: React.FC<ExpenseModalProps> = ({
@@ -20,7 +21,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
   onSubmit,
   expense,
   categories,
-  mode
+  mode,
+  onCategoryCreated
 }) => {
   const handleSubmit = (formData: Omit<Expense, '_id'>) => {
     onSubmit(formData);
@@ -46,6 +48,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         expense={expense}
         categories={categories}
         mode={mode}
+        onCategoryCreated={onCategoryCreated}
       />
     </CustomModal>
   );

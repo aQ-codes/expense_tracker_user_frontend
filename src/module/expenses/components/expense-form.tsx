@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Expense } from '../../../interfaces/expense';
+import { Category, Expense } from '@/interfaces/expense';
+import useExpenseService from '../services/expense-service';
 
 interface ExpenseFormProps {
   onSubmit: (expense: Omit<Expense, '_id'>) => void;
@@ -9,6 +10,7 @@ interface ExpenseFormProps {
   expense?: Expense | null;
   categories: Category[];
   mode: 'add' | 'edit';
+  onCategoryCreated?: (newCategory: Category) => void;
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
@@ -16,7 +18,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onCancel,
   expense,
   categories,
-  mode
+  mode,
+  onCategoryCreated
 }) => {
   const [formData, setFormData] = useState<Omit<Expense, '_id'>>({
     title: '',
@@ -24,19 +27,42 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     category: '',
     date: ''
   });
+  const [amountInput, setAmountInput] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+
+  const expenseService = useExpenseService();
 
   useEffect(() => {
     if (expense && mode === 'edit') {
+      // Format the date properly for display (YYYY-MM-DD format)
+      let displayDate = '';
+      if (expense.date) {
+        const dateObj = new Date(expense.date);
+        if (!isNaN(dateObj.getTime())) {
+          displayDate = dateObj.getFullYear() + '-' + 
+            String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(dateObj.getDate()).padStart(2, '0');
+        }
+      }
+      
       setFormData({
         title: expense.title,
         amount: expense.amount,
         category: expense.category,
-        date: expense.date
+        date: displayDate
       });
-      setSelectedDate(new Date(expense.date));
+      setAmountInput(expense.amount.toString());
+      
+      // Parse the date properly for the calendar
+      const dateObj = new Date(expense.date);
+      if (!isNaN(dateObj.getTime())) {
+        setSelectedDate(dateObj);
+      }
     } else {
       setFormData({
         title: '',
@@ -44,6 +70,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         category: '',
         date: ''
       });
+      setAmountInput('');
       setSelectedDate(null);
     }
     setErrors({});
@@ -63,7 +90,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       newErrors.title = 'Title is required';
     }
     
-    if (formData.amount <= 0) {
+    const amountValue = parseFloat(amountInput);
+    if (isNaN(amountValue) || amountValue <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
     }
     
@@ -82,15 +110,50 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      const amountValue = parseFloat(amountInput);
+      onSubmit({
+        ...formData,
+        amount: amountValue
+      });
     }
   };
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    const formattedDate = date.toISOString().split('T')[0];
+    const formattedDate = date.getFullYear() + '-' + 
+      String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(date.getDate()).padStart(2, '0');
     setFormData(prev => ({ ...prev, date: formattedDate }));
     setIsDatePickerOpen(false);
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      setCategoryError('Category name is required');
+      return;
+    }
+
+    if (newCategoryName.trim().length < 2) {
+      setCategoryError('Category name must be at least 2 characters');
+      return;
+    }
+
+    try {
+      const response = await expenseService.createCategory(newCategoryName.trim());
+      if (response.status && response.data) {
+        // The response.data should be a single category object
+        const newCategory = response.data;
+        onCategoryCreated?.(newCategory);
+        setFormData(prev => ({ ...prev, category: newCategory.id }));
+        setNewCategoryName('');
+        setIsAddingCategory(false);
+        setCategoryError('');
+      } else {
+        setCategoryError(response.message || 'Failed to create category');
+      }
+    } catch (error) {
+      setCategoryError('Failed to create category');
+    }
   };
 
   const generateCalendarDays = (year: number, month: number) => {
@@ -147,20 +210,70 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Category
         </label>
-        <select
-          value={formData.category}
-          onChange={(e) => handleInputChange('category', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-            errors.category ? 'border-red-500' : 'border-gray-300'
-          }`}
-        >
-          <option value="">Select Category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+        <div className="space-y-2">
+          <select
+            value={formData.category}
+            onChange={(e) => handleInputChange('category', e.target.value)}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              errors.category ? 'border-red-500' : 'border-gray-300'
+            }`}
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          
+          {/* Add New Category Button */}
+          <button
+            type="button"
+            onClick={() => setIsAddingCategory(!isAddingCategory)}
+            className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+          >
+            + Add New Category
+          </button>
+
+          {/* Add Category Form */}
+          {isAddingCategory && (
+            <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => {
+                    setNewCategoryName(e.target.value);
+                    setCategoryError('');
+                  }}
+                  placeholder="Enter category name"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCategory}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingCategory(false);
+                    setNewCategoryName('');
+                    setCategoryError('');
+                  }}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              {categoryError && (
+                <p className="text-red-500 text-sm mt-1">{categoryError}</p>
+              )}
+            </div>
+          )}
+        </div>
         {errors.category && (
           <p className="text-red-500 text-sm mt-1">{errors.category}</p>
         )}
@@ -172,10 +285,16 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           Amount
         </label>
         <input
-          type="number"
-          value={formData.amount}
-          onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
-          placeholder="e.g. 500"
+          type="text"
+          value={amountInput}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^0-9.]/g, '');
+            setAmountInput(value);
+            if (errors.amount) {
+              setErrors(prev => ({ ...prev, amount: '' }));
+            }
+          }}
+          placeholder="₹ e.g. 500"
           className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
             errors.amount ? 'border-red-500' : 'border-gray-300'
           }`}
@@ -257,16 +376,24 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
                   date.getMonth() === selectedDate.getMonth() &&
                   date.getFullYear() === selectedDate.getFullYear();
                 
+                // Disable future dates
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isFutureDate = date > today;
+                
                 return (
                   <button
                     key={index}
                     type="button"
-                    onClick={() => handleDateSelect(date)}
+                    onClick={() => !isFutureDate && handleDateSelect(date)}
+                    disabled={isFutureDate}
                     className={`p-2 text-sm rounded hover:bg-gray-100 ${
                       isSelected
                         ? 'bg-purple-600 text-white hover:bg-purple-700'
                         : isCurrentMonth
-                        ? 'text-gray-900'
+                        ? isFutureDate
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-900'
                         : 'text-gray-400'
                     }`}
                   >

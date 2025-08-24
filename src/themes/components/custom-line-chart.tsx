@@ -19,11 +19,21 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
   height = 300,
   className = ""
 }) => {
+  // Format date for display
+  const formatDateForDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    return `${day} ${month}`;
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white shadow-md rounded-lg p-2 border border-gray-200">
-          <p className="text-xs font-semibold text-purple-800 mb-1">{label}</p>
+          <p className="text-xs font-semibold text-purple-800 mb-1">
+            {label ? formatDateForDisplay(label) : 'Unknown Date'}
+          </p>
           <p className="text-sm text-gray-600">
             Amount: <span className="text-sm font-medium text-gray-900">${payload[0].value.toLocaleString()}</span>
           </p>
@@ -31,6 +41,12 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
       );
     }
     return null;
+  };
+
+  // Custom tick formatter for X-axis
+  const formatXAxisTick = (tickItem: string) => {
+    if (!tickItem) return '';
+    return formatDateForDisplay(tickItem);
   };
 
   return (
@@ -45,10 +61,12 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
           </defs>
           <CartesianGrid stroke="none" />
           <XAxis 
-            dataKey="month" 
+            dataKey="date" 
             tick={{ fontSize: 12, fill: "#555" }}
             axisLine={false}
             tickLine={false}
+            tickFormatter={formatXAxisTick}
+            interval="preserveStartEnd"
           />
           <YAxis 
             tick={{ fontSize: 12, fill: "#555" }} 

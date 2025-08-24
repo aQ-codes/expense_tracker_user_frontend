@@ -1,21 +1,34 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import ExpenseLineChart from '../components/expense-line-chart';
 import ExpenseFilters from '../components/expense-filters';
 import ExpenseList from '../components/expense-list';
 import ExpenseModal from '../components/expense-modal';
 import ToastNotification from '../../../themes/components/toast-notification';
 import { Category, Expense, ExpenseWithCategory } from '@/interfaces/expense';
+import useExpenseService from '../services/expense-service';
+import { getCategoryColor, MONTHS, formatDate } from '../constants';
+import { getCategoryIcon as getIcon } from '../constants/icons';
+import http from '@/utils/http';
 
 const ExpenseView: React.FC = () => {
   // State management
   const [expenses, setExpenses] = useState<ExpenseWithCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editingExpense, setEditingExpense] = useState<ExpenseWithCategory | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<Array<{ date: string; amount: number }>>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1
+  });
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error' | 'info';
@@ -26,197 +39,145 @@ const ExpenseView: React.FC = () => {
     isVisible: false
   });
 
-  // Mock categories data
-  const categories: Category[] = [
-    {
-      id: '1',
-      name: 'Shopping',
-      color: '#fce7f3',
-      icon: (
-        <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
-    },
-    {
-      id: '2',
-      name: 'Travel',
-      color: '#dbeafe',
-      icon: (
-        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-      ),
-    },
-    {
-      id: '3',
-      name: 'Bills',
-      color: '#fef3c7',
-      icon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      ),
-    },
-    {
-      id: '4',
-      name: 'Food',
-      color: '#dcfce7',
-      icon: (
-        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-        </svg>
-      ),
-    },
-    {
-      id: '5',
-      name: 'Transport',
-      color: '#f3e8ff',
-      icon: (
-        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-      ),
-    },
-    {
-      id: '6',
-      name: 'Education',
-      color: '#fef3c7',
-      icon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
-    },
-  ];
+  // Service hooks
+  const expenseService = useExpenseService();
 
-  // Mock expenses data
-  const mockExpenses: ExpenseWithCategory[] = [
-    {
-      _id: '1',
-      title: 'Shopping',
-      amount: 430,
-      category: {
-        id: '1',
-        name: 'Shopping',
-        color: '#fce7f3',
-        icon: categories[0].icon,
-      },
-      date: '2025-02-17',
-      createdBy: 'user1',
-    },
-    {
-      _id: '2',
-      title: 'Travel',
-      amount: 670,
-      category: {
-        id: '2',
-        name: 'Travel',
-        color: '#dbeafe',
-        icon: categories[1].icon,
-      },
-      date: '2025-02-13',
-      createdBy: 'user1',
-    },
-    {
-      _id: '3',
-      title: 'Electricity Bill',
-      amount: 200,
-      category: {
-        id: '3',
-        name: 'Bills',
-        color: '#fef3c7',
-        icon: categories[2].icon,
-      },
-      date: '2025-02-11',
-      createdBy: 'user1',
-    },
-    {
-      _id: '4',
-      title: 'Loan Repayment',
-      amount: 600,
-      category: {
-        id: '3',
-        name: 'Bills',
-        color: '#fef3c7',
-        icon: categories[2].icon,
-      },
-      date: '2025-02-10',
-      createdBy: 'user1',
-    },
-    {
-      _id: '5',
-      title: 'Transport',
-      amount: 300,
-      category: {
-        id: '5',
-        name: 'Transport',
-        color: '#f3e8ff',
-        icon: categories[4].icon,
-      },
-      date: '2025-01-14',
-      createdBy: 'user1',
-    },
-    {
-      _id: '6',
-      title: 'Education',
-      amount: 800,
-      category: {
-        id: '6',
-        name: 'Education',
-        color: '#fef3c7',
-        icon: categories[5].icon,
-      },
-      date: '2025-01-11',
-      createdBy: 'user1',
-    },
-  ];
-
-  // Initialize expenses with mock data
-  React.useEffect(() => {
-    setExpenses(mockExpenses);
+  // Load categories on component mount
+  useEffect(() => {
+    loadCategories();
+    loadChartData(); // Also load chart data on mount
   }, []);
 
-  // Mock line chart data
-  const lineChartData = [
-    { date: '2nd Jan', amount: 500 },
-    { date: '3rd Jan', amount: 200 },
-    { date: '4th Jan', amount: 300 },
-    { date: '5th Jan', amount: 100 },
-    { date: '6th Jan', amount: 50 },
-    { date: '7th Jan', amount: 600 },
-    { date: '8th Jan', amount: 400 },
-    { date: '9th Jan', amount: 300 },
-    { date: '10th Jan', amount: 200 },
-    { date: '11th Jan', amount: 400 },
-    { date: '12th Jan', amount: 900 },
-    { date: '14th Jan', amount: 400 },
-    { date: '10th Feb', amount: 500 },
-    { date: '11th Feb', amount: 200 },
-    { date: '17th Feb', amount: 650 },
-  ];
+  // Load expenses when filters change
+  useEffect(() => {
+    loadExpenses();
+  }, [selectedCategory, selectedMonth, pagination.page]);
 
-  // Filter expenses based on selected filters
-  const filteredExpenses = useMemo(() => {
-    let filtered = [...expenses];
-
-    // Filter by category
-    if (selectedCategory) {
-      filtered = filtered.filter(expense => expense.category.id === selectedCategory);
+  // Load categories from backend
+  const loadCategories = async () => {
+    try {
+      console.log('Loading categories...');
+      const response = await expenseService.getCategories();
+      console.log('Categories response:', response);
+      
+      if (response.status && response.data) {
+        console.log('Raw categories data:', response.data);
+        // Transform backend categories to frontend format with icons and colors
+        const transformedCategories: Category[] = response.data.map((backendCategory: any) => ({
+          id: backendCategory.id,
+          name: backendCategory.name,
+          color: getCategoryColor(backendCategory.name),
+          icon: getIcon(backendCategory.name)
+        }));
+        console.log('Transformed categories:', transformedCategories);
+        setCategories(transformedCategories);
+      } else {
+        console.log('No categories data or error:', response);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      showToast('Failed to load categories', 'error');
     }
+  };
 
-    // Filter by month
-    if (selectedMonth) {
-      filtered = filtered.filter(expense => {
-        const expenseMonth = new Date(expense.date).getMonth() + 1;
-        const selectedMonthNum = parseInt(selectedMonth);
-        return expenseMonth === selectedMonthNum;
-      });
+  // Load expenses from backend
+  const loadExpenses = async () => {
+    try {
+      setLoading(true);
+      const filters: any = {};
+      if (selectedCategory) filters.category = selectedCategory;
+      if (selectedMonth) filters.month = selectedMonth;
+
+      const response = await expenseService.getExpenses(
+        pagination.page,
+        pagination.limit,
+        filters
+      );
+
+      if (response.status && response.data) {
+        // Transform backend expenses to frontend format
+        const transformedExpenses: ExpenseWithCategory[] = response.data.map((backendExpense: any) => {
+          console.log('Backend expense data:', {
+            id: backendExpense._id,
+            title: backendExpense.title,
+            date: backendExpense.date,
+            formattedDate: backendExpense.formattedDate
+          });
+          
+          return {
+            _id: backendExpense._id,
+            title: backendExpense.title,
+            amount: backendExpense.amount,
+            date: backendExpense.date,
+            formattedDate: backendExpense.formattedDate || formatDate(backendExpense.date),
+            category: {
+              id: backendExpense.category._id,
+              name: backendExpense.category.name,
+              color: getCategoryColor(backendExpense.category.name),
+              icon: getIcon(backendExpense.category.name)
+            },
+            createdBy: backendExpense.createdBy
+          };
+        });
+
+        setExpenses(transformedExpenses);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
+        
+        // Load chart data
+        await loadChartData();
+      } else {
+        setExpenses([]);
+        showToast(response.message || 'Failed to load expenses', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading expenses:', error);
+      showToast('Failed to load expenses', 'error');
+      setExpenses([]);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Sort by date (reverse chronological order)
-    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenses, selectedCategory, selectedMonth]);
+  // Get chart data
+  const getChartData = async () => {
+    try {
+      const response = await expenseService.getChartData();
+      if (response.status && response.data) {
+        return response.data.monthlyData.map((item: any) => ({
+          date: item.month,
+          amount: item.amount
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading chart data:', error);
+    }
+    return [];
+  };
+
+  // Load chart data
+  const loadChartData = async () => {
+    try {
+      console.log('Loading chart data...');
+      const response = await expenseService.getChartData();
+      console.log('Chart data response:', response);
+      
+      if (response.status && response.data) {
+        console.log('Raw chart data:', response.data);
+        // Backend now provides the exact format needed by frontend
+        const monthlyData = response.data.monthlyData;
+        console.log('Monthly data for chart:', monthlyData);
+        setChartData(monthlyData);
+      } else {
+        console.log('No chart data or error:', response);
+        setChartData([]);
+      }
+    } catch (error) {
+      console.error('Error loading chart data:', error);
+      setChartData([]);
+    }
+  };
 
   // Handlers
   const handleAddExpense = () => {
@@ -231,60 +192,90 @@ const ExpenseView: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteExpense = (expenseId: string) => {
-    setExpenses(prev => prev.filter(expense => expense._id !== expenseId));
-    showToast('Expense deleted successfully', 'success');
-  };
-
-  const handleSubmitExpense = (expenseData: Omit<Expense, '_id'>) => {
-    if (modalMode === 'add') {
-      const newExpense: ExpenseWithCategory = {
-        _id: Date.now().toString(),
-        title: expenseData.title,
-        amount: expenseData.amount,
-        date: expenseData.date,
-        category: categories.find(cat => cat.id === expenseData.category)!,
-        createdBy: 'user1',
-      };
-      setExpenses(prev => [newExpense, ...prev]);
-      showToast('Expense added successfully', 'success');
-    } else {
-      setExpenses(prev => prev.map(expense => 
-        expense._id === editingExpense?._id 
-          ? { 
-              ...expense, 
-              title: expenseData.title,
-              amount: expenseData.amount,
-              date: expenseData.date,
-              category: categories.find(cat => cat.id === expenseData.category)!
-            }
-          : expense
-      ));
-      showToast('Expense updated successfully', 'success');
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      const response = await expenseService.deleteExpense(expenseId);
+      if (response.status) {
+        showToast('Expense deleted successfully', 'success');
+        loadExpenses(); // Reload expenses and chart data
+      } else {
+        showToast(response.message || 'Failed to delete expense', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      showToast('Failed to delete expense', 'error');
     }
   };
 
-  const handleExport = () => {
-    // Mock CSV export functionality
-    const csvContent = [
-      ['Title', 'Amount', 'Category', 'Date'],
-      ...filteredExpenses.map(expense => [
-        expense.title,
-        expense.amount.toString(),
-        expense.category.name,
-        new Date(expense.date).toLocaleDateString()
-      ])
-    ].map(row => row.join(',')).join('\n');
+  const handleSubmitExpense = async (expenseData: Omit<Expense, '_id'>) => {
+    try {
+      let response;
+      if (modalMode === 'add') {
+        response = await expenseService.createExpense(expenseData);
+      } else {
+        response = await expenseService.updateExpense(editingExpense!._id!, expenseData);
+      }
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'expenses.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
+      if (response.status) {
+        showToast(
+          modalMode === 'add' ? 'Expense added successfully' : 'Expense updated successfully',
+          'success'
+        );
+        setIsModalOpen(false);
+        loadExpenses(); // Reload expenses and chart data
+      } else {
+        showToast(response.message || 'Failed to save expense', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      showToast('Failed to save expense', 'error');
+    }
+  };
 
-    showToast('Expenses exported to CSV', 'success');
+  const handleCategoryCreated = (newCategory: Category) => {
+    // Add the new category to the categories list
+    setCategories(prev => [...prev, newCategory]);
+    showToast('Category created successfully', 'success');
+  };
+
+  const handleExport = async () => {
+    try {
+      const filters: any = {};
+      if (selectedCategory) filters.category = selectedCategory;
+      if (selectedMonth) filters.month = selectedMonth;
+
+      // Create the request payload
+      const payload = filters as any;
+      
+      // Use the existing HTTP utility to make the request
+      const { response } = await http().post('/api/expenses/export', payload);
+      
+      if (response.status === 200) {
+        // Get the CSV content as blob
+        const blob = new Blob([response.data], { type: 'text/csv' });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'expenses.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showToast('Expenses exported to CSV', 'success');
+      } else {
+        showToast('Failed to export expenses', 'error');
+      }
+    } catch (error) {
+      console.error('Error exporting expenses:', error);
+      showToast('Failed to export expenses', 'error');
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, page }));
   };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
@@ -311,7 +302,10 @@ const ExpenseView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Line Chart */}
-      <ExpenseLineChart data={lineChartData} onAddExpense={handleAddExpense} />
+      <ExpenseLineChart 
+        data={chartData}
+        onAddExpense={handleAddExpense} 
+      />
 
       {/* Filters */}
       <ExpenseFilters
@@ -324,10 +318,15 @@ const ExpenseView: React.FC = () => {
 
       {/* Expense List */}
       <ExpenseList
-        expenses={convertToExpenseListArray(filteredExpenses)}
+        expenses={convertToExpenseListArray(expenses)}
         onDelete={handleDeleteExpense}
         onEdit={handleEditExpense}
         onExport={handleExport}
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        onPageChange={handlePageChange}
+        totalItems={pagination.total}
+        itemsPerPage={pagination.limit}
       />
 
       {/* Modal */}
@@ -344,6 +343,7 @@ const ExpenseView: React.FC = () => {
         } : null}
         categories={categories}
         mode={modalMode}
+        onCategoryCreated={handleCategoryCreated}
       />
 
       {/* Toast Notification */}

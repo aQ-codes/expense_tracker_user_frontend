@@ -1,25 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-
-interface Expense {
-  _id: string;
-  title: string;
-  amount: number;
-  category: {
-    id: string;
-    name: string;
-    color: string;
-    icon: React.ReactNode;
-  };
-  date: string;
-  createdBy: string;
-}
+import { ExpenseWithCategory } from '@/interfaces/expense';
 
 interface ExpenseListProps {
-  expenses: Expense[];
+  expenses: ExpenseWithCategory[];
   onDelete: (expenseId: string) => void;
-  onEdit: (expense: Expense) => void;
+  onEdit: (expense: ExpenseWithCategory) => void;
   onExport: () => void;
   className?: string;
   currentPage?: number;
@@ -43,25 +30,6 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
 }) => {
   const [hoveredExpense, setHoveredExpense] = useState<string | null>(null);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const suffix = getDaySuffix(day);
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day}${suffix} ${month} ${year}`;
-  };
-
-  const getDaySuffix = (day: number) => {
-    if (day > 3 && day < 21) return 'th';
-    switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
-    }
-  };
-
   return (
     <div className={`bg-white rounded-xl shadow-lg ${className}`}>
       {/* Header */}
@@ -84,7 +52,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
           <div
             key={expense._id}
             className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all relative"
-            onMouseEnter={() => setHoveredExpense(expense._id)}
+            onMouseEnter={() => setHoveredExpense(expense._id || '')}
             onMouseLeave={() => setHoveredExpense(null)}
           >
             <div className="flex items-center justify-between mb-3">
@@ -98,7 +66,19 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-gray-900 truncate">{expense.title}</h4>
-                  <p className="text-sm text-gray-500">{formatDate(expense.date)}</p>
+                  <p className="text-sm text-gray-500">
+                    {expense.formattedDate || (() => {
+                      // Fallback date formatting
+                      const date = new Date(expense.date);
+                      if (!isNaN(date.getTime())) {
+                        const day = date.getDate();
+                        const month = date.toLocaleDateString('en-US', { month: 'short' });
+                        const year = date.getFullYear();
+                        return `${day} ${month} ${year}`;
+                      }
+                      return expense.date;
+                    })()}
+                  </p>
                 </div>
               </div>
 
@@ -107,7 +87,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                 {/* Delete Button (shown on hover) */}
                 {hoveredExpense === expense._id && (
                   <button
-                    onClick={() => onDelete(expense._id)}
+                    onClick={() => onDelete(expense._id || '')}
                     className="text-gray-400 hover:text-red-500 transition-colors"
                     title="Delete expense"
                   >
