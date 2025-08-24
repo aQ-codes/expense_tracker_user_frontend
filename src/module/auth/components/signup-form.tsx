@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Input from '@/themes/components/input';
 import Button from '@/themes/components/button';
+import { useAuthService, SignupFormErrors } from '../services/auth-service';
 
 interface SignupFormData {
   fullName: string;
@@ -13,15 +15,10 @@ interface SignupFormData {
   avatar?: File;
 }
 
-interface SignupFormErrors {
-  fullName?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  avatar?: string;
-}
-
 const SignupForm: React.FC = () => {
+  const router = useRouter();
+  const { signup } = useAuthService();
+  
   const [formData, setFormData] = useState<SignupFormData>({
     fullName: '',
     email: '',
@@ -72,63 +69,31 @@ const SignupForm: React.FC = () => {
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: SignupFormErrors = {};
-
-    // Full name validation
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = 'Full name must be at least 2 characters';
-    }
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
-
     setIsLoading(true);
     
     try {
-      // TODO: Implement signup logic here
-      console.log('Signup attempt:', formData);
+      const response = await signup(formData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Handle successful signup
-      console.log('Signup successful');
-      
+      if (response.status) {
+        // Signup successful
+        console.log('Signup successful:', response.message);
+        // Redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        // Handle validation errors or other errors
+        if (response.data?.errors) {
+          setErrors(response.data.errors);
+        } else {
+          // Set a general error message
+          setErrors({ email: response.message });
+        }
+      }
     } catch (error) {
       console.error('Signup failed:', error);
-      // TODO: Handle signup error
+      setErrors({ email: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsLoading(false);
     }

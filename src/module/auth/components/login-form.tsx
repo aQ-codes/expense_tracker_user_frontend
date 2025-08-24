@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Input from '@/themes/components/input';
 import Button from '@/themes/components/button';
+import { useAuthService } from '../services/auth-service';
 
 interface LoginFormData {
   email: string;
@@ -16,6 +18,9 @@ interface LoginFormErrors {
 }
 
 const LoginForm: React.FC = () => {
+  const router = useRouter();
+  const { login } = useAuthService();
+  
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -23,6 +28,7 @@ const LoginForm: React.FC = () => {
 
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,6 +43,11 @@ const LoginForm: React.FC = () => {
         ...prev,
         [name]: undefined,
       }));
+    }
+    
+    // Clear submit error when user starts typing
+    if (submitError) {
+      setSubmitError('');
     }
   };
 
@@ -53,8 +64,6 @@ const LoginForm: React.FC = () => {
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
     }
 
     setErrors(newErrors);
@@ -69,20 +78,23 @@ const LoginForm: React.FC = () => {
     }
 
     setIsLoading(true);
+    setSubmitError('');
     
     try {
-      // TODO: Implement login logic here
-      console.log('Login attempt:', formData);
+      const response = await login({
+        email: formData.email,
+        password: formData.password
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Handle successful login
-      console.log('Login successful');
-      
+      if (response.status) {
+        // Redirect to dashboard on successful login
+        router.push('/dashboard');
+      } else {
+        setSubmitError(response.message);
+      }
     } catch (error) {
       console.error('Login failed:', error);
-      // TODO: Handle login error
+      setSubmitError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +110,13 @@ const LoginForm: React.FC = () => {
 
       {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Submit Error */}
+        {submitError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{submitError}</p>
+          </div>
+        )}
+
         {/* Email Field */}
         <Input
           id="email"
@@ -117,7 +136,7 @@ const LoginForm: React.FC = () => {
           name="password"
           type="password"
           label="Password"
-          placeholder="Min 8 Characters"
+          placeholder="Enter your password"
           value={formData.password}
           onChange={handleInputChange}
           error={errors.password}
