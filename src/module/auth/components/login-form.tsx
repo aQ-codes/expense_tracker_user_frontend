@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Input from '@/themes/components/Input';
-import Button from '@/themes/components/Button';
+import Input from '@/themes/components/input';
+import Button from '@/themes/components/button';
 
 interface LoginFormData {
   email: string;

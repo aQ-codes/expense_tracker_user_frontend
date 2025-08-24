@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Input from '@/themes/components/Input';
-import Button from '@/themes/components/Button';
-import Avatar from '@/themes/components/Avatar';
+import Input from '@/themes/components/input';
+import Button from '@/themes/components/button';
 
 interface SignupFormData {
   fullName: string;
