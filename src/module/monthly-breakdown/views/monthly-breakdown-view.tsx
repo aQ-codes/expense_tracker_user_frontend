@@ -144,14 +144,14 @@ const MonthlyBreakdownView: React.FC = () => {
       if (response.status) {
         // Create and download CSV file
         const csvContent = response.data;
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
         const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('en-US', { month: 'long' });
         a.download = `expenses-${monthName}-${selectedYear}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+    a.click();
+    window.URL.revokeObjectURL(url);
         setToast({
           isVisible: true,
           message: 'Export completed successfully',
@@ -216,9 +216,9 @@ const MonthlyBreakdownView: React.FC = () => {
         {/* Daily Breakdown Chart */}
         <DailyBreakdownChart
           dailyData={monthlyData.dailyBreakdown}
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
-        />
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+      />
 
         {/* Category Distribution Chart */}
         <CategoryDistributionChart

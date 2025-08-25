@@ -64,9 +64,9 @@ const SideNavbar: React.FC = () => {
   ];
 
   return (
-    <div className="w-64 bg-white h-screen shadow-lg flex flex-col">
+    <div className="w-64 bg-white h-screen shadow-lg flex flex-col flex-shrink-0">
       {/* App Title */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="h-16 flex items-center px-6 border-b border-gray-200 flex-shrink-0">
         <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
       </div>
 
