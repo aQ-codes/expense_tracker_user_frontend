@@ -1,115 +1,191 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TotalExpenseCard from '../components/total-expense-card';
 import MonthlyExpenseCards from '../components/monthly-expense-cards';
 import RecentExpenses from '../components/recent-expenses';
 import ExpenseDistributionChart from '../components/expense-distribution-chart';
 import MonthlyExpensesChart from '../components/monthly-expenses-chart';
+import ToastNotification from '../../../themes/components/toast-notification';
+import ExpenseModal from '../../expenses/components/expense-modal';
+import useDashboardService from '../services/dashboard-service';
+import useExpenseService from '../../expenses/services/expense-service';
+import { DashboardData, DashboardExpense } from '@/interfaces/expense';
 
 const DashboardView: React.FC = () => {
-  // Mock data - replace with actual API calls
-  const totalExpenses = 7100;
-  const thisMonthExpenses = 3200;
-  const lastMonthExpenses = 2800;
-  
-  const recentExpenses = [
-    {
-      id: '1',
-      title: 'Shopping',
-      amount: 430,
-      date: '17th Feb 2025',
-      category: 'Shopping',
-      categoryColor: '#fce7f3',
-      categoryIcon: (
-        <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    stats: {
+      totalExpenses: 0,
+      thisMonthExpenses: 0,
+      lastMonthExpenses: 0,
+      percentageChange: 0
     },
-    {
-      id: '2',
-      title: 'Travel',
-      amount: 670,
-      date: '13th Feb 2025',
-      category: 'Travel',
-      categoryColor: '#dbeafe',
-      categoryIcon: (
-        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-      ),
-    },
-    {
-      id: '3',
-      title: 'Electricity Bill',
-      amount: 200,
-      date: '11th Feb 2025',
-      category: 'Bills',
-      categoryColor: '#fef3c7',
-      categoryIcon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      ),
-    },
-    {
-      id: '4',
-      title: 'Loan Repayment',
-      amount: 600,
-      date: '10th Feb 2025',
-      category: 'Finance',
-      categoryColor: '#dcfce7',
-      categoryIcon: (
-        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
-    },
-    {
-      id: '5',
-      title: 'Transport',
-      amount: 300,
-      date: '14th Jan 2025',
-      category: 'Transport',
-      categoryColor: '#fef3c7',
-      categoryIcon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-      ),
-    },
-  ];
+    recentExpenses: [],
+    expenseDistribution: [],
+    monthlyExpensesData: []
+  });
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+    isVisible: boolean;
+  }>({
+    message: '',
+    type: 'success',
+    isVisible: false
+  });
 
-  const expenseDistribution = [
-    { name: 'Shopping', value: 1500, color: '#fce7f3' },
-    { name: 'Travel', value: 1200, color: '#dbeafe' },
-    { name: 'Bills', value: 800, color: '#fef3c7' },
-    { name: 'Food', value: 600, color: '#dcfce7' },
-    { name: 'Transport', value: 400, color: '#f3e8ff' },
-    { name: 'Others', value: 600, color: '#fee2e2' },
-  ];
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
-  const monthlyExpensesData = [
-    { month: 'Sep', amount: 420 },
-    { month: 'Oct', amount: 680 },
-    { month: 'Nov', amount: 200 },
-    { month: 'Dec', amount: 600 },
-    { month: 'Jan', amount: 450 },
-    { month: 'Feb', amount: 320 },
-  ];
+  const dashboardService = useDashboardService();
+  const expenseService = useExpenseService();
+
+  useEffect(() => {
+    loadDashboardData();
+    loadCategories();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await dashboardService.getDashboardData();
+      
+      if (response.status && response.data) {
+        // The backend now returns the correct format, no transformation needed
+        setDashboardData(response.data);
+      } else {
+        showToast(response.message || 'Failed to load dashboard data', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      showToast('Failed to load dashboard data', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({
+      message,
+      type,
+      isVisible: true
+    });
+  };
+
+  const closeToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await expenseService.getCategories();
+      if (response.status && response.data) {
+        setCategories(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      const response = await expenseService.deleteExpense(expenseId);
+      if (response.status) {
+        showToast('Expense deleted successfully', 'success');
+        // Update local state instead of reloading entire dashboard
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentExpenses: prevData.recentExpenses.filter(expense => expense._id !== expenseId),
+          stats: {
+            ...prevData.stats,
+            totalExpenses: prevData.stats.totalExpenses - 1
+          }
+        }));
+      } else {
+        showToast(response.message || 'Failed to delete expense', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      showToast('Failed to delete expense', 'error');
+    }
+  };
+
+  const handleEditExpense = (expense: DashboardExpense) => {
+    // The expense is already in the correct format, just set it directly
+    setEditingExpense(expense);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = async (expenseData: any) => {
+    try {
+      let response;
+      if (editingExpense) {
+        // Update existing expense - use _id from transformed expense
+        const expenseId = editingExpense._id;
+        response = await expenseService.updateExpense(expenseId, expenseData);
+      } else {
+        // Create new expense
+        response = await expenseService.createExpense(expenseData);
+      }
+
+      if (response.status) {
+        showToast(
+          editingExpense ? 'Expense updated successfully' : 'Expense created successfully', 
+          'success'
+        );
+        setIsModalOpen(false);
+        setEditingExpense(null);
+        
+        if (editingExpense) {
+          // Update local state for edit
+          setDashboardData(prevData => ({
+            ...prevData,
+            recentExpenses: prevData.recentExpenses.map(expense => 
+              expense._id === editingExpense._id 
+                ? { ...expense, ...expenseData }
+                : expense
+            )
+          }));
+        } else {
+          // Reload for new expense since we need the full data
+          loadDashboardData();
+        }
+      } else {
+        showToast(response.message || 'Failed to save expense', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      showToast('Failed to save expense', 'error');
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingExpense(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Top Section - Total Expense Card and Monthly Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1">
-          <TotalExpenseCard amount={totalExpenses} />
+          <TotalExpenseCard amount={dashboardData.stats.totalExpenses} />
         </div>
         <div className="md:col-span-2">
           <MonthlyExpenseCards 
-            thisMonth={thisMonthExpenses} 
-            lastMonth={lastMonthExpenses} 
+            thisMonth={dashboardData.stats.thisMonthExpenses} 
+            lastMonth={dashboardData.stats.lastMonthExpenses} 
           />
         </div>
       </div>
@@ -117,14 +193,36 @@ const DashboardView: React.FC = () => {
       {/* Middle Section - Recent Expenses and Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Panel - Recent Expenses */}
-        <RecentExpenses expenses={recentExpenses} />
+        <RecentExpenses 
+          expenses={dashboardData.recentExpenses}
+          onDelete={handleDeleteExpense}
+          onEdit={handleEditExpense}
+        />
         
         {/* Right Panel - Expense Distribution Chart */}
-        <ExpenseDistributionChart data={expenseDistribution} />
+        <ExpenseDistributionChart data={dashboardData.expenseDistribution} />
       </div>
 
       {/* Bottom Section - Monthly Expenses Bar Chart */}
-      <MonthlyExpensesChart data={monthlyExpensesData} />
+      <MonthlyExpensesChart data={dashboardData.monthlyExpensesData} />
+
+      {/* Toast Notification */}
+      <ToastNotification
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={closeToast}
+      />
+
+      {/* Expense Modal */}
+      <ExpenseModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+        expense={editingExpense}
+        categories={categories}
+        mode={editingExpense ? 'edit' : 'add'}
+      />
     </div>
   );
 };

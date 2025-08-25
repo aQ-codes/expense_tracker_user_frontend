@@ -1,13 +1,9 @@
 import React from 'react';
 import CustomBarChart from '@/themes/components/custom-bar-chart';
-
-interface MonthlyExpenseData {
-  month: string;
-  amount: number;
-}
+import { ExpenseData } from '@/interfaces/expense';
 
 interface MonthlyExpensesChartProps {
-  data: MonthlyExpenseData[];
+  data: ExpenseData[];
   className?: string;
 }
 
@@ -17,7 +13,10 @@ const MonthlyExpensesChart: React.FC<MonthlyExpensesChartProps> = ({
 }) => {
   return (
     <CustomBarChart
-      data={data}
+      data={data.map(item => ({
+        month: item.date,
+        amount: item.amount
+      }))}
       title="Monthly Expenses Over Last 6 Months"
       className={className}
     />

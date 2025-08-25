@@ -66,7 +66,7 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
     <div className={`bg-white rounded-xl p-6 shadow-lg ${className}`}>
       <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">{title}</h3>
       
-      <div className="h-80">
+      <div className="h-80 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -91,14 +91,16 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
             <Legend content={<CustomLegend />} />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      
-      {/* Total amount in center */}
-      <div className="text-center mt-4">
-        <p className="text-sm text-gray-600">Total Expenses</p>
-        <p className="text-2xl font-bold text-gray-900">
-          ${total.toLocaleString()}
-        </p>
+        
+        {/* Total amount in center of pie chart */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 font-medium">Total</p>
+            <p className="text-xl font-bold text-gray-900">
+              ${total.toLocaleString()}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

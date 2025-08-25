@@ -1,24 +1,20 @@
 import React from 'react';
 import Link from 'next/link';
-
-interface ExpenseItem {
-  id: string;
-  title: string;
-  amount: number;
-  date: string;
-  category: string;
-  categoryColor: string;
-  categoryIcon: React.ReactNode;
-}
+import ExpenseCard from '@/themes/components/expense-card';
+import { DashboardExpense } from '@/interfaces/expense';
 
 interface RecentExpensesProps {
-  expenses: ExpenseItem[];
+  expenses: DashboardExpense[];
   className?: string;
+  onDelete?: (expenseId: string) => void;
+  onEdit?: (expense: any) => void;
 }
 
 const RecentExpenses: React.FC<RecentExpensesProps> = ({ 
   expenses, 
-  className = "" 
+  className = "",
+  onDelete,
+  onEdit
 }) => {
   return (
     <div className={`bg-white rounded-xl p-6 shadow-lg ${className}`}>
@@ -39,33 +35,14 @@ const RecentExpenses: React.FC<RecentExpensesProps> = ({
       {/* Expenses List */}
       <div className="space-y-4">
         {expenses.map((expense) => (
-          <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="flex items-center">
-              {/* Category Icon */}
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
-                style={{ backgroundColor: expense.categoryColor }}
-              >
-                {expense.categoryIcon}
-              </div>
-              
-              {/* Expense Details */}
-              <div>
-                <p className="font-medium text-gray-900">{expense.title}</p>
-                <p className="text-sm text-gray-500">{expense.date}</p>
-              </div>
-            </div>
-            
-            {/* Amount */}
-            <div className="flex items-center">
-              <span className="text-red-600 font-semibold mr-2">
-                - ${expense.amount.toLocaleString()}
-              </span>
-              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
-          </div>
+          <ExpenseCard
+            key={expense._id}
+            expense={expense}
+            variant="recent"
+            showActions={true}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
         ))}
       </div>
     </div>

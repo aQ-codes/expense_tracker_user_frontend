@@ -122,3 +122,34 @@ export interface ExportData {
   expenses: ExpenseWithCategory[];
   filters: ExpenseFilters;
 }
+
+// Dashboard expense interface (for recent expenses and dashboard data)
+export interface DashboardExpense {
+  _id: string;
+  title: string;
+  amount: number;
+  date: string;
+  formattedDate?: string;
+  category: {
+    _id: string;
+    name: string;
+    color: string;
+    icon?: React.ReactNode;
+  };
+  createdBy?: string;
+}
+
+// Dashboard data interfaces
+export interface DashboardStats {
+  totalExpenses: number;
+  thisMonthExpenses: number;
+  lastMonthExpenses: number;
+  percentageChange: number;
+}
+
+export interface DashboardData {
+  stats: DashboardStats;
+  recentExpenses: DashboardExpense[];
+  expenseDistribution: CategoryDistributionData[];
+  monthlyExpensesData: ExpenseData[];
+}
