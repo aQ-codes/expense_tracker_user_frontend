@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuthService } from '@/module/auth/services/auth-service';
 
 interface NavItem {
   name: string;
@@ -12,6 +13,25 @@ interface NavItem {
 
 const SideNavbar: React.FC = () => {
   const pathname = usePathname();
+  const { getCurrentUser } = useAuthService();
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [getCurrentUser]);
 
   const navItems: NavItem[] = [
     {
@@ -58,7 +78,19 @@ const SideNavbar: React.FC = () => {
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
           </div>
-          <h3 className="text-sm font-medium text-gray-900">Mike William</h3>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-32"></div>
+            </div>
+          ) : user ? (
+            <>
+              <h3 className="text-sm font-medium text-gray-900">{user.name}</h3>
+              <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+            </>
+          ) : (
+            <div className="text-sm text-gray-500">User not found</div>
+          )}
         </div>
       </div>
 

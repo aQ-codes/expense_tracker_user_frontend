@@ -81,13 +81,7 @@ const Header: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 w-full">
         <div className="flex items-center justify-between">
           {/* Left side - Title */}
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">Expense Tracker</h1>
-            {/* Debug info - remove in production */}
-            <div className="text-xs text-gray-500 mt-1">
-              Authentication: HTTP-only cookies managed by backend
-            </div>
-          </div>
+         
 
           {/* Right side - Logout */}
           <div>
