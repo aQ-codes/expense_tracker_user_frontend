@@ -1,4 +1,5 @@
 import React from 'react';
+import { RecentExpensesIcon } from '@/themes/images/icon';
 import Link from 'next/link';
 import ExpenseCard from '@/themes/components/expense-card';
 import { DashboardExpense } from '@/interfaces/expense';
@@ -26,9 +27,7 @@ const RecentExpenses: React.FC<RecentExpensesProps> = ({
           className="text-purple-600 hover:text-purple-700 font-medium text-sm flex items-center"
         >
           See All
-          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+                      <RecentExpensesIcon />
         </Link>
       </div>
 

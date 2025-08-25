@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { DeleteIcon, EditIcon } from '@/themes/images/icon';
 
 interface ExpenseCardProps {
   expense: {
@@ -115,9 +116,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
               className="text-gray-400 hover:text-red-500 transition-colors"
               title="Delete expense"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              <DeleteIcon />
             </button>
           )}
 
@@ -133,9 +132,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
               className="text-gray-400 hover:text-gray-600 transition-colors"
               title="Edit expense"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
+              <EditIcon />
             </button>
           )}
         </div>
@@ -174,9 +171,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
               className="text-gray-400 hover:text-red-500 transition-colors"
               title="Delete expense"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              <DeleteIcon />
             </button>
           )}
 
@@ -194,9 +189,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
               className="text-gray-400 hover:text-gray-600 transition-colors"
               title="Edit expense"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
+              <EditIcon />
             </button>
           )}
         </div>

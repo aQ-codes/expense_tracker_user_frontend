@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { CalendarPrevIcon, CalendarNextIcon } from '@/themes/images/icon';
 
 interface CalendarProps {
   selectedDate: Date | null;
@@ -109,18 +110,14 @@ const Calendar: React.FC<CalendarProps> = ({
             onClick={() => handleMonthChange('prev')}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <CalendarPrevIcon />
           </button>
           <button
             type="button"
             onClick={() => handleMonthChange('next')}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <CalendarNextIcon />
           </button>
         </div>
       </div>

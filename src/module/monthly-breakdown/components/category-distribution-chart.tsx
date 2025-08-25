@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { EmptyChartIcon } from '@/themes/images/icon';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface CategoryDistributionChartProps {
@@ -74,7 +75,7 @@ const CategoryDistributionChart: React.FC<CategoryDistributionChartProps> = ({
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -91,10 +92,7 @@ const CategoryDistributionChart: React.FC<CategoryDistributionChartProps> = ({
       ) : (
         <div className="flex items-center justify-center h-64 text-gray-500">
           <div className="text-center">
-            <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-            </svg>
+            <EmptyChartIcon />
             <p className="text-lg font-medium">No data available</p>
             <p className="text-sm">No expenses recorded for this month</p>
           </div>
