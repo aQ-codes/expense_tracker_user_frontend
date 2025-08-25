@@ -8,7 +8,6 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get(TOKEN_COOKIE_NAME)?.value;
 
   // Debug logging
-  console.log(`Middleware: ${pathname}, Token: ${!!token}, Token value: ${token ? token.substring(0, 20) + '...' : 'none'}`);
 
   // Allow all static assets to pass through
   if (
@@ -28,13 +27,13 @@ export function middleware(request: NextRequest) {
 
   // If user has a valid token and trying to access public routes, redirect to dashboard
   if (isValidToken && isPublicRoute) {
-    console.log(`Middleware: Redirecting authenticated user from ${pathname} to /dashboard`);
+
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // If user is not authenticated and trying to access protected routes, redirect to login
   if (!isValidToken && !isPublicRoute && pathname !== '/') {
-    console.log(`Middleware: Redirecting unauthenticated user from ${pathname} to /login`);
+
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

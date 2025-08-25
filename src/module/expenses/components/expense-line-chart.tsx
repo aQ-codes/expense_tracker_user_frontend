@@ -20,7 +20,7 @@ const ExpenseLineChart: React.FC<ExpenseLineChartProps> = ({
   // No transformation needed - data already has { date, amount } format
 
   // Debug logging
-  console.log('ExpenseLineChart - Chart data:', data);
+
 
   return (
     <div className={`bg-white rounded-xl p-6 shadow-lg ${className}`}>

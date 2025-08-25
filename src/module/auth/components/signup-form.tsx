@@ -79,7 +79,7 @@ const SignupForm: React.FC = () => {
       
       if (response.status) {
         // Signup successful
-        console.log('Signup successful:', response.message);
+
         // Redirect to dashboard
         router.push('/dashboard');
       } else {

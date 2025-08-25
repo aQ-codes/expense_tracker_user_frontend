@@ -18,7 +18,6 @@ export default function RootPage() {
           router.push('/login');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
         router.push('/login');
       }
     };

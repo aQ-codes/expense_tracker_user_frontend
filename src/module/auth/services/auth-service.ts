@@ -150,15 +150,9 @@ export const useAuthService = () => {
    */
   const logout = async (): Promise<{ status: boolean; message: string }> => {
     try {
-      console.log('Auth service: Starting logout...');
-      
       // Call backend logout endpoint to clear HTTP-only cookie
-      console.log('Auth service: Calling backend logout...');
       const payload: JSON = <JSON>(<unknown>{});
       await http().post(`${apiUrl}/auth/logout`, payload);
-      console.log('Auth service: Backend logout successful');
-      
-      console.log('Auth service: Logout completed - HTTP-only cookies cleared by server');
       
       return {
         status: true,

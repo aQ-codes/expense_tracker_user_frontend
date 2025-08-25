@@ -21,10 +21,10 @@ const Header: React.FC = () => {
     
     setIsLoggingOut(true);
     try {
-      console.log('Starting logout process...');
+  
       
       const response = await logout();
-      console.log('Logout response:', response);
+      
       
       if (response.status) {
         setToast({
@@ -34,7 +34,7 @@ const Header: React.FC = () => {
         });
         
         // Force redirect to login page immediately
-        console.log('Redirecting to login page...');
+
         
         // Clear any cached state
         router.refresh();

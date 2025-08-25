@@ -145,7 +145,7 @@ const MonthlyBreakdownView: React.FC = () => {
 
   const handleEditExpense = useCallback((expense: ExpenseWithCategory) => {
     // In a real app, this would open an edit modal
-    console.log('Edit expense:', expense);
+
   }, []);
 
   const handleExport = useCallback(async () => {

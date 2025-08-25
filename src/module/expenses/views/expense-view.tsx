@@ -56,12 +56,9 @@ const ExpenseView: React.FC = () => {
   // Load categories from backend
   const loadCategories = async () => {
     try {
-      console.log('Loading categories...');
       const response = await expenseService.getCategories();
-      console.log('Categories response:', response);
       
       if (response.status && response.data) {
-        console.log('Raw categories data:', response.data);
         // Transform backend categories to frontend format with icons and colors
         const transformedCategories: Category[] = response.data.map((backendCategory: Category) => ({
           id: backendCategory.id,
@@ -69,10 +66,7 @@ const ExpenseView: React.FC = () => {
           color: getCategoryColor(backendCategory.name),
           icon: getIcon(backendCategory.name)
         }));
-        console.log('Transformed categories:', transformedCategories);
         setCategories(transformedCategories);
-      } else {
-        console.log('No categories data or error:', response);
       }
     } catch (error) {
       console.error('Error loading categories:', error);
@@ -138,18 +132,13 @@ const ExpenseView: React.FC = () => {
   // Load chart data
   const loadChartData = async () => {
     try {
-      console.log('Loading chart data...');
       const response = await expenseService.getChartData();
-      console.log('Chart data response:', response);
       
       if (response.status && response.data) {
-        console.log('Raw chart data:', response.data);
         // Backend now provides the exact format needed by frontend
         const monthlyData = response.data.monthlyData;
-        console.log('Monthly data for chart:', monthlyData);
         setChartData(monthlyData);
       } else {
-        console.log('No chart data or error:', response);
         setChartData([]);
       }
     } catch (error) {
