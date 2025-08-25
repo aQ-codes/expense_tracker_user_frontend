@@ -22,7 +22,13 @@ const SideNavbar: React.FC = () => {
     const fetchUser = async () => {
       try {
         const userData = await getCurrentUser();
-        setUser(userData);
+        console.log('User data received:', userData); // Debug log
+        if (userData && userData.name && userData.email) {
+          setUser(userData);
+        } else {
+          console.log('User data is null or incomplete:', userData);
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error fetching user:', error);
         setUser(null);

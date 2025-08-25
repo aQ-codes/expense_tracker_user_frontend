@@ -11,6 +11,55 @@ const axioClient = Axios.create({
 
 const http = () => {
   /**
+   * HTTP GET method for API request
+   * @param url - API endpoint path
+   * @returns Response data
+   */
+  const get = async (url: string) => {
+    const fullUrl = `${backendUrl}${url}`;
+    const config: AxiosRequestConfig = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    
+    const response = await axioClient
+      .get(fullUrl, config)
+      .then((response) => {
+        if (response.data == undefined || response.data == "") {
+          response.data = {
+            status: false,
+            message: "server error [001]",
+          };
+        }
+        return response;
+      })
+      .catch((error) => {
+        if (error.response && error.response.status == 422) {
+          error.response.data.status = false;
+          return error.response;
+        } else if (error.response) {
+          error.response.data = {
+            status: false,
+            message: error?.response?.data.message,
+            errors: error?.response?.data.errors,
+          };
+          return error.response;
+        } else {
+          return {
+            data: {
+              status: false,
+              message: "server error [100]",
+            },
+          };
+        }
+      });
+
+    const body = response.data;
+    return { response, body };
+  };
+
+  /**
    * HTTP POST method for API request
    * @param url - API endpoint path
    * @param props - Request data
@@ -72,7 +121,7 @@ const http = () => {
     return { response, body };
   };
 
-  return { post };
+  return { get, post };
 };
 
 export default http;

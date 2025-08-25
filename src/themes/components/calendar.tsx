@@ -97,8 +97,13 @@ const Calendar: React.FC<CalendarProps> = ({
   return (
     <div 
       ref={calendarRef}
-      className={`absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-4 w-80 ${className}`}
-      style={{ maxHeight: '400px', overflowY: 'auto' }}
+      className={`absolute z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-4 w-80 ${className}`}
+      style={{ 
+        maxHeight: '400px', 
+        overflowY: 'auto',
+        bottom: '100%', // Position above the trigger element
+        marginBottom: '8px' // Add some space between calendar and input
+      }}
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-gray-900">

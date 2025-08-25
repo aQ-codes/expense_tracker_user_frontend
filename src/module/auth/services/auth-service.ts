@@ -178,7 +178,7 @@ export const useAuthService = () => {
    */
   const getProfile = async (): Promise<{ status: boolean; data?: User; message: string }> => {
     try {
-      const { body } = await http().post(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/auth/profile`);
 
       if (body.status) {
         return {
@@ -208,7 +208,7 @@ export const useAuthService = () => {
    */
   const isAuthenticated = async (): Promise<boolean> => {
     try {
-      const { body } = await http().post(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/auth/profile`);
       return body.status;
     } catch {
       return false;
@@ -220,7 +220,7 @@ export const useAuthService = () => {
    */
   const getCurrentUser = async (): Promise<User | null> => {
     try {
-      const { body } = await http().post(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/auth/profile`);
       if (body.status) {
         return body.data.user;
       }
