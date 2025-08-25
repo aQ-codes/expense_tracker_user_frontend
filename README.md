@@ -46,7 +46,7 @@ Modern, responsive UI for managing personal expenses with real-time analytics an
    
    Edit `.env.local` file:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 
    ```
 
