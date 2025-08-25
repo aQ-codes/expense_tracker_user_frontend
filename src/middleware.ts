@@ -32,17 +32,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // If user is not authenticated and trying to access root path, redirect to login
-  if (!isValidToken && pathname === '/') {
-    console.log(`Middleware: Redirecting unauthenticated user from ${pathname} to /login`);
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
   // If user is not authenticated and trying to access protected routes, redirect to login
   if (!isValidToken && !isPublicRoute && pathname !== '/') {
     console.log(`Middleware: Redirecting unauthenticated user from ${pathname} to /login`);
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // For root path, let the page component handle the redirect
+  if (pathname === '/') {
+    return NextResponse.next();
+  }
+
+  // Let the catch-all route handle invalid routes
+  // This allows us to show 404 pages while staying on the same URL
 
   return NextResponse.next();
 }

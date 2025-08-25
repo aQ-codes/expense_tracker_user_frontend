@@ -92,11 +92,12 @@ export const useAuthService = () => {
         };
       }
 
-      // Prepare data for backend (remove confirmPassword and avatar for now)
+      // Prepare data for backend
       const signupPayload = {
         name: data.fullName,
         email: data.email,
-        password: data.password
+        password: data.password,
+        confirmPassword: data.confirmPassword
       };
 
       const payload: JSON = <JSON>(<unknown>signupPayload);

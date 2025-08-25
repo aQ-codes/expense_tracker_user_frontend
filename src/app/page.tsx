@@ -1,0 +1,38 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthService } from '@/module/auth/services/auth-service';
+
+export default function RootPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthService();
+
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      try {
+        const authenticated = await isAuthenticated();
+        if (authenticated) {
+          router.push('/dashboard');
+        } else {
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/login');
+      }
+    };
+
+    checkAuthAndRedirect();
+  }, [isAuthenticated, router]);
+
+  // Show loading while checking authentication
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
