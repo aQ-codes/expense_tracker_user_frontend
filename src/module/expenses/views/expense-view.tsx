@@ -145,10 +145,8 @@ const ExpenseView: React.FC = () => {
     try {
       const response = await expenseService.getChartData();
       if (response.status && response.data) {
-        return response.data.monthlyData.map((item: any) => ({
-          date: item.month,
-          amount: item.amount
-        }));
+        // Backend returns daily data with 'date' property, no mapping needed
+        return response.data.monthlyData;
       }
     } catch (error) {
       console.error('Error loading chart data:', error);
