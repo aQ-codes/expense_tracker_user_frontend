@@ -1,4 +1,3 @@
-import { setToken, removeToken, getToken, decodeToken } from '@/utils/cookie';
 import axios from 'axios';
 
 export interface User {
@@ -111,13 +110,8 @@ export const useAuthService = () => {
 
       const response = await api.post('/api/auth/signup', signupPayload);
       
-      if (response.data.status) {
-        // Set token in cookie
-        setToken(response.data.data.token);
-        return response.data;
-      } else {
-        return response.data;
-      }
+      // Backend sets HTTP-only cookie automatically
+      return response.data;
     } catch (error: any) {
       console.error('Signup error:', error);
       
@@ -143,13 +137,8 @@ export const useAuthService = () => {
     try {
       const response = await api.post('/api/auth/login', data);
       
-      if (response.data.status) {
-        // Set token in cookie
-        setToken(response.data.data.token);
-        return response.data;
-      } else {
-        return response.data;
-      }
+      // Backend sets HTTP-only cookie automatically
+      return response.data;
     } catch (error: any) {
       console.error('Login error:', error);
       return {
@@ -164,30 +153,25 @@ export const useAuthService = () => {
    */
   const logout = async (): Promise<{ status: boolean; message: string }> => {
     try {
-      const token = getToken();
-      if (token) {
-        // Call backend logout endpoint
-        await api.post('/api/auth/logout', {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      }
+      console.log('Auth service: Starting logout...');
       
-      // Remove token from cookie
-      removeToken();
+      // Call backend logout endpoint to clear HTTP-only cookie
+      console.log('Auth service: Calling backend logout...');
+      await api.post('/api/auth/logout', {});
+      console.log('Auth service: Backend logout successful');
+      
+      console.log('Auth service: Logout completed - HTTP-only cookies cleared by server');
       
       return {
         status: true,
         message: 'Logged out successfully'
       };
     } catch (error: any) {
-      console.error('Logout error:', error);
-      // Still remove token even if backend call fails
-      removeToken();
+      console.error('Auth service: Logout error:', error);
+      
       return {
         status: true,
-        message: 'Logged out successfully'
+        message: 'Logged out successfully (local cleanup completed)'
       };
     }
   };
@@ -197,19 +181,7 @@ export const useAuthService = () => {
    */
   const getProfile = async (): Promise<{ status: boolean; data?: User; message: string }> => {
     try {
-      const token = getToken();
-      if (!token) {
-        return {
-          status: false,
-          message: 'No authentication token found'
-        };
-      }
-
-      const response = await api.get('/api/auth/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/api/auth/profile');
 
       if (response.data.status) {
         return {
@@ -234,34 +206,30 @@ export const useAuthService = () => {
 
   /**
    * Check if user is authenticated
+   * Note: This relies on the backend to validate the HTTP-only cookie
    */
-  const isAuthenticated = (): boolean => {
-    const token = getToken();
-    if (!token) return false;
-
-    // Check if token is expired
-    const decoded = decodeToken(token);
-    if (!decoded) return false;
-
-    const currentTime = Date.now() / 1000;
-    return decoded.exp > currentTime;
+  const isAuthenticated = async (): Promise<boolean> => {
+    try {
+      const response = await api.get('/api/auth/profile');
+      return response.data.status;
+    } catch (error) {
+      return false;
+    }
   };
 
   /**
-   * Get current user from token
+   * Get current user from profile
    */
-  const getCurrentUser = (): User | null => {
-    const token = getToken();
-    if (!token) return null;
-
-    const decoded = decodeToken(token);
-    if (!decoded) return null;
-
-    return {
-      id: decoded.userId,
-      email: decoded.email,
-      name: decoded.name || 'User'
-    };
+  const getCurrentUser = async (): Promise<User | null> => {
+    try {
+      const response = await api.get('/api/auth/profile');
+      if (response.data.status) {
+        return response.data.data.user;
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
   };
 
   return {

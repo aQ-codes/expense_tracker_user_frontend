@@ -1,10 +1,15 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MonthlySelector from '../components/monthly-selector';
 import MonthlySummary from '../components/monthly-summary';
 import ExpenseList from '../../expenses/components/expense-list';
+import DailyBreakdownChart from '../components/daily-breakdown-chart';
+import CategoryDistributionChart from '../components/category-distribution-chart';
 import { Category, ExpenseWithCategory } from '@/interfaces/expense';
+import useMonthlyBreakdownService from '../services/monthly-breakdown-service';
+import useExpenseService from '../../expenses/services/expense-service';
+import ToastNotification from '@/themes/components/toast-notification';
 
 const MonthlyBreakdownView: React.FC = () => {
   // Get current month and year
@@ -12,178 +17,77 @@ const MonthlyBreakdownView: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
-  // Mock categories data (same as expense page)
-  const categories: Category[] = [
-    {
-      id: '1',
-      name: 'Shopping',
-      color: '#fce7f3',
-      icon: (
-        <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
+  // State for data
+  const [monthlyData, setMonthlyData] = useState({
+    summary: {
+      totalSpent: 0,
+      totalExpenses: 0,
+      averagePerDay: 0,
+      daysInMonth: 0
     },
-    {
-      id: '2',
-      name: 'Travel',
-      color: '#dbeafe',
-      icon: (
-        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-      ),
-    },
-    {
-      id: '3',
-      name: 'Bills',
-      color: '#fef3c7',
-      icon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      ),
-    },
-    {
-      id: '4',
-      name: 'Food',
-      color: '#dcfce7',
-      icon: (
-        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m6 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-        </svg>
-      ),
-    },
-    {
-      id: '5',
-      name: 'Transport',
-      color: '#f3e8ff',
-      icon: (
-        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-        </svg>
-      ),
-    },
-    {
-      id: '6',
-      name: 'Education',
-      color: '#fef3c7',
-      icon: (
-        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
-    },
-  ];
+    expenses: [],
+    categoryDistribution: [],
+    dailyBreakdown: []
+  });
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success' as 'success' | 'error' | 'info' | 'warning'
+  });
 
-  // Mock expenses data with more diverse dates
-  const mockExpenses: ExpenseWithCategory[] = [
-    {
-      _id: '1',
-      title: 'Shopping',
-      amount: 430,
-      category: categories[0],
-      date: '2025-02-17',
-      createdBy: 'user1',
-    },
-    {
-      _id: '2',
-      title: 'Travel',
-      amount: 670,
-      category: categories[1],
-      date: '2025-02-13',
-      createdBy: 'user1',
-    },
-    {
-      _id: '3',
-      title: 'Electricity Bill',
-      amount: 200,
-      category: categories[2],
-      date: '2025-02-11',
-      createdBy: 'user1',
-    },
-    {
-      _id: '4',
-      title: 'Loan Repayment',
-      amount: 600,
-      category: categories[2],
-      date: '2025-02-10',
-      createdBy: 'user1',
-    },
-    {
-      _id: '5',
-      title: 'Transport',
-      amount: 300,
-      category: categories[4],
-      date: '2025-01-14',
-      createdBy: 'user1',
-    },
-    {
-      _id: '6',
-      title: 'Education',
-      amount: 800,
-      category: categories[5],
-      date: '2025-01-11',
-      createdBy: 'user1',
-    },
-    {
-      _id: '7',
-      title: 'Grocery Shopping',
-      amount: 150,
-      category: categories[3],
-      date: '2025-02-15',
-      createdBy: 'user1',
-    },
-    {
-      _id: '8',
-      title: 'Movie Tickets',
-      amount: 80,
-      category: categories[0],
-      date: '2025-02-20',
-      createdBy: 'user1',
-    },
-    {
-      _id: '9',
-      title: 'Gas Station',
-      amount: 120,
-      category: categories[4],
-      date: '2025-02-18',
-      createdBy: 'user1',
-    },
-    {
-      _id: '10',
-      title: 'Restaurant',
-      amount: 95,
-      category: categories[3],
-      date: '2025-02-16',
-      createdBy: 'user1',
-    },
-  ];
+  // Services
+  const monthlyBreakdownService = useMonthlyBreakdownService();
+  const expenseService = useExpenseService();
 
-  // Filter expenses for selected month/year
-  const monthlyExpenses = useMemo(() => {
-    return mockExpenses.filter(expense => {
-      const expenseDate = new Date(expense.date);
-      const expenseMonth = expenseDate.getMonth() + 1;
-      const expenseYear = expenseDate.getFullYear();
-      
-      return expenseMonth === selectedMonth && expenseYear === selectedYear;
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [selectedMonth, selectedYear]);
-
-  // Calculate summary statistics
-  const summaryStats = useMemo(() => {
-    const totalSpent = monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const totalExpenses = monthlyExpenses.length;
-    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-    const averagePerDay = totalSpent / daysInMonth;
-
-    return {
-      totalSpent,
-      totalExpenses,
-      averagePerDay
+  // Load categories on component mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await expenseService.getCategories();
+        if (response.status) {
+          setCategories(response.data);
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
     };
-  }, [monthlyExpenses, selectedMonth, selectedYear]);
+
+    loadCategories();
+  }, []); // Remove expenseService from dependencies
+
+  // Load monthly breakdown data
+  useEffect(() => {
+    const loadMonthlyBreakdown = async () => {
+      setLoading(true);
+      try {
+        const response = await monthlyBreakdownService.getMonthlyBreakdown(selectedMonth, selectedYear);
+        if (response.status) {
+          setMonthlyData(response.data);
+        } else {
+          setToast({
+            isVisible: true,
+            message: response.message,
+            type: 'error'
+          });
+        }
+      } catch (error) {
+        console.error('Error loading monthly breakdown:', error);
+        setToast({
+          isVisible: true,
+          message: 'Failed to load monthly breakdown data',
+          type: 'error'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMonthlyBreakdown();
+  }, [selectedMonth, selectedYear]); // Remove monthlyBreakdownService from dependencies
 
   // Convert to ExpenseList format
   const convertToExpenseListFormat = (expenseWithCategory: ExpenseWithCategory) => ({
@@ -195,42 +99,101 @@ const MonthlyBreakdownView: React.FC = () => {
     createdBy: expenseWithCategory.createdBy
   });
 
-  const expenseListData = monthlyExpenses.map(convertToExpenseListFormat);
+  const expenseListData = monthlyData.expenses.map(convertToExpenseListFormat);
 
   // Handlers
-  const handleDeleteExpense = (expenseId: string) => {
-    // In a real app, this would call an API
-    console.log('Delete expense:', expenseId);
-  };
+  const handleDeleteExpense = useCallback(async (expenseId: string) => {
+    try {
+      const response = await expenseService.deleteExpense(expenseId);
+      if (response.status) {
+        setToast({
+          isVisible: true,
+          message: 'Expense deleted successfully',
+          type: 'success'
+        });
+        // Reload monthly breakdown data
+        const breakdownResponse = await monthlyBreakdownService.getMonthlyBreakdown(selectedMonth, selectedYear);
+        if (breakdownResponse.status) {
+          setMonthlyData(breakdownResponse.data);
+        }
+      } else {
+        setToast({
+          isVisible: true,
+          message: response.message,
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      setToast({
+        isVisible: true,
+        message: 'Failed to delete expense',
+        type: 'error'
+      });
+    }
+  }, [selectedMonth, selectedYear]); // Add dependencies for the callback
 
-  const handleEditExpense = (expense: any) => {
+  const handleEditExpense = useCallback((expense: any) => {
     // In a real app, this would open an edit modal
     console.log('Edit expense:', expense);
-  };
+  }, []);
 
-  const handleExport = () => {
-    // Mock CSV export functionality
-    const csvContent = [
-      ['Title', 'Amount', 'Category', 'Date'],
-      ...monthlyExpenses.map(expense => [
-        expense.title,
-        expense.amount.toString(),
-        expense.category.name,
-        new Date(expense.date).toLocaleDateString()
-      ])
-    ].map(row => row.join(',')).join('\n');
+  const handleExport = useCallback(async () => {
+    try {
+      const response = await monthlyBreakdownService.exportMonthlyExpenses(selectedMonth, selectedYear);
+      if (response.status) {
+        // Create and download CSV file
+        const csvContent = response.data;
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const monthName = new Date(selectedYear, selectedMonth - 1, 1).toLocaleDateString('en-US', { month: 'long' });
+        a.download = `expenses-${monthName}-${selectedYear}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setToast({
+          isVisible: true,
+          message: 'Export completed successfully',
+          type: 'success'
+        });
+      } else {
+        setToast({
+          isVisible: true,
+          message: response.message,
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error exporting expenses:', error);
+      setToast({
+        isVisible: true,
+        message: 'Failed to export expenses',
+        type: 'error'
+      });
+    }
+  }, [selectedMonth, selectedYear]); // Add dependencies for the callback
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `expenses-${selectedMonth}-${selectedYear}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      <ToastNotification
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast({ ...toast, isVisible: false })}
+        duration={3000}
+        position="top-right"
+      />
+      
       {/* Monthly Selector */}
       <MonthlySelector
         selectedMonth={selectedMonth}
@@ -241,12 +204,29 @@ const MonthlyBreakdownView: React.FC = () => {
 
       {/* Monthly Summary */}
       <MonthlySummary
-        totalSpent={summaryStats.totalSpent}
-        totalExpenses={summaryStats.totalExpenses}
-        averagePerDay={summaryStats.averagePerDay}
+        totalSpent={monthlyData.summary.totalSpent}
+        totalExpenses={monthlyData.summary.totalExpenses}
+        averagePerDay={monthlyData.summary.averagePerDay}
         selectedMonth={selectedMonth}
         selectedYear={selectedYear}
       />
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Daily Breakdown Chart */}
+        <DailyBreakdownChart
+          dailyData={monthlyData.dailyBreakdown}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+        />
+
+        {/* Category Distribution Chart */}
+        <CategoryDistributionChart
+          categoryData={monthlyData.categoryDistribution}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+        />
+      </div>
 
       {/* Monthly Expenses List */}
       <ExpenseList

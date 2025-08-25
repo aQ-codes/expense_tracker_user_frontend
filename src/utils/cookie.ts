@@ -3,8 +3,8 @@ import Cookies from 'js-cookie';
 const TOKEN_COOKIE_NAME = 'token';
 const COOKIE_OPTIONS = {
   expires: 7, // 7 days
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  secure: process.env.NODE_ENV === 'production', // false in development
+  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax' as 'strict' | 'lax',
 };
 
 /**
@@ -25,9 +25,29 @@ export const getToken = (): string | undefined => {
 
 /**
  * Remove JWT token from cookie
+ * Note: This only works for client-side cookies, not httpOnly cookies
  */
 export const removeToken = (): void => {
+  console.log('Cookie utils: Attempting to remove client-side token...');
+  
+  // Try to remove any client-side cookies (non-httpOnly)
   Cookies.remove(TOKEN_COOKIE_NAME);
+  Cookies.remove(TOKEN_COOKIE_NAME, { path: '/' });
+  Cookies.remove(TOKEN_COOKIE_NAME, { 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/'
+  });
+  
+  // Also try to expire the cookie
+  Cookies.set(TOKEN_COOKIE_NAME, '', { 
+    expires: new Date(0),
+    path: '/'
+  });
+  
+  console.log('Cookie utils: Client-side token removal attempted');
+  console.log('Cookie utils: Client-side token after removal:', !!Cookies.get(TOKEN_COOKIE_NAME));
+  console.log('Cookie utils: Note: HTTP-only cookies must be cleared by the server');
 };
 
 /**

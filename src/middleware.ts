@@ -7,6 +7,9 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const token = request.cookies.get(TOKEN_COOKIE_NAME)?.value;
 
+  // Debug logging
+  console.log(`Middleware: ${pathname}, Token: ${!!token}, Token value: ${token ? token.substring(0, 20) + '...' : 'none'}`);
+
   // Allow all static assets to pass through
   if (
     pathname.match(/\.(svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|css|js)$/) || 
@@ -20,18 +23,24 @@ export function middleware(request: NextRequest) {
   const publicRoutes = ['/login', '/signup'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
-  // If user is authenticated and trying to access public routes, redirect to dashboard
-  if (token && isPublicRoute) {
+  // Check if token is valid (not empty or just whitespace)
+  const isValidToken = token && token.trim().length > 0 && token !== 'undefined' && token !== 'null';
+
+  // If user has a valid token and trying to access public routes, redirect to dashboard
+  if (isValidToken && isPublicRoute) {
+    console.log(`Middleware: Redirecting authenticated user from ${pathname} to /dashboard`);
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // If user is not authenticated and trying to access root path, redirect to login
-  if (!token && pathname === '/') {
+  if (!isValidToken && pathname === '/') {
+    console.log(`Middleware: Redirecting unauthenticated user from ${pathname} to /login`);
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // If user is not authenticated and trying to access protected routes, redirect to login
-  if (!token && !isPublicRoute && pathname !== '/') {
+  if (!isValidToken && !isPublicRoute && pathname !== '/') {
+    console.log(`Middleware: Redirecting unauthenticated user from ${pathname} to /login`);
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
