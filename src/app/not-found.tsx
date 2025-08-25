@@ -10,9 +10,7 @@ export default function NotFound() {
     router.back();
   };
 
-  const handleGoHome = () => {
-    router.push('/');
-  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -30,9 +28,9 @@ export default function NotFound() {
         </h1>
 
         {/* Message */}
-        <p className="text-lg text-gray-600 mb-8">
-          Oops! The page you're looking for doesn't exist.
-        </p>
+                   <p className="text-lg text-gray-600 mb-8">
+             Oops! The page you&apos;re looking for doesn&apos;t exist.
+           </p>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -43,12 +41,12 @@ export default function NotFound() {
             Go Back
           </button>
           
-          <Link
-            href="/"
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-          >
-            Go Home
-          </Link>
+                     <button
+             onClick={() => router.push('/')}
+             className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+           >
+             Go Home
+           </button>
         </div>
       </div>
     </div>

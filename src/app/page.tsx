@@ -17,7 +17,7 @@ export default function RootPage() {
         } else {
           router.push('/login');
         }
-      } catch (error) {
+      } catch {
         router.push('/login');
       }
     };

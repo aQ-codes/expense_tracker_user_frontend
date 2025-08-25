@@ -42,9 +42,9 @@ export default function CatchAllPage() {
         </h1>
 
         {/* Message */}
-        <p className="text-lg text-gray-600 mb-8">
-          Oops! The page you're looking for doesn't exist.
-        </p>
+                   <p className="text-lg text-gray-600 mb-8">
+             Oops! The page you&apos;re looking for doesn&apos;t exist.
+           </p>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
