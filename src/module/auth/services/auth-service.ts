@@ -1,4 +1,4 @@
-import axios from 'axios';
+import http from '@/utils/http';
 
 export interface User {
   id: string;
@@ -38,16 +38,7 @@ export interface SignupFormErrors {
 }
 
 export const useAuthService = () => {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-
-  // Create axios instance with credentials
-  const api = axios.create({
-    baseURL: backendUrl,
-    withCredentials: true,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  const apiUrl = '/api';
 
   /**
    * Validate signup form data
@@ -97,7 +88,7 @@ export const useAuthService = () => {
         return {
           status: false,
           message: 'Validation failed',
-          data: { errors: validationErrors } as any
+          data: { errors: validationErrors }
         };
       }
 
@@ -108,24 +99,27 @@ export const useAuthService = () => {
         password: data.password
       };
 
-      const response = await api.post('/api/auth/signup', signupPayload);
+      const payload: JSON = <JSON>(<unknown>signupPayload);
+      const { body } = await http().post(`${apiUrl}/auth/signup`, payload);
       
       // Backend sets HTTP-only cookie automatically
-      return response.data;
-    } catch (error: any) {
+      return body;
+    } catch (error: unknown) {
       console.error('Signup error:', error);
       
       // Handle specific error cases
-      if (error.response?.status === 409) {
+      const signupError = error as { response?: { status?: number; data?: { message?: string } } };
+      if (signupError.response?.status === 409) {
         return {
           status: false,
           message: 'User with this email already exists'
         };
       }
       
+      const signupAxiosError = error as { response?: { data?: { message?: string } } };
       return {
         status: false,
-        message: error.response?.data?.message || 'Signup failed. Please try again.'
+        message: signupAxiosError.response?.data?.message || 'Signup failed. Please try again.'
       };
     }
   };
@@ -135,15 +129,17 @@ export const useAuthService = () => {
    */
   const login = async (data: LoginData): Promise<AuthResponse> => {
     try {
-      const response = await api.post('/api/auth/login', data);
+      const payload: JSON = <JSON>(<unknown>data);
+      const { body } = await http().post(`${apiUrl}/auth/login`, payload);
       
       // Backend sets HTTP-only cookie automatically
-      return response.data;
-    } catch (error: any) {
+      return body;
+    } catch (error: unknown) {
       console.error('Login error:', error);
+      const axiosError = error as { response?: { data?: { message?: string } } };
       return {
         status: false,
-        message: error.response?.data?.message || 'Login failed'
+        message: axiosError.response?.data?.message || 'Login failed'
       };
     }
   };
@@ -157,7 +153,8 @@ export const useAuthService = () => {
       
       // Call backend logout endpoint to clear HTTP-only cookie
       console.log('Auth service: Calling backend logout...');
-      await api.post('/api/auth/logout', {});
+      const payload: JSON = <JSON>(<unknown>{});
+      await http().post(`${apiUrl}/auth/logout`, payload);
       console.log('Auth service: Backend logout successful');
       
       console.log('Auth service: Logout completed - HTTP-only cookies cleared by server');
@@ -166,7 +163,7 @@ export const useAuthService = () => {
         status: true,
         message: 'Logged out successfully'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth service: Logout error:', error);
       
       return {
@@ -181,25 +178,26 @@ export const useAuthService = () => {
    */
   const getProfile = async (): Promise<{ status: boolean; data?: User; message: string }> => {
     try {
-      const response = await api.get('/api/auth/profile');
+      const { body } = await http().post(`${apiUrl}/auth/profile`);
 
-      if (response.data.status) {
+      if (body.status) {
         return {
           status: true,
-          data: response.data.data.user,
-          message: response.data.message
+          data: body.data.user,
+          message: body.message
         };
       } else {
         return {
           status: false,
-          message: response.data.message
+          message: body.message
         };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Get profile error:', error);
+      const profileError = error as { response?: { data?: { message?: string } } };
       return {
         status: false,
-        message: error.response?.data?.message || 'Failed to get profile'
+        message: profileError.response?.data?.message || 'Failed to get profile'
       };
     }
   };
@@ -210,9 +208,9 @@ export const useAuthService = () => {
    */
   const isAuthenticated = async (): Promise<boolean> => {
     try {
-      const response = await api.get('/api/auth/profile');
-      return response.data.status;
-    } catch (error) {
+      const { body } = await http().post(`${apiUrl}/auth/profile`);
+      return body.status;
+    } catch {
       return false;
     }
   };
@@ -222,12 +220,12 @@ export const useAuthService = () => {
    */
   const getCurrentUser = async (): Promise<User | null> => {
     try {
-      const response = await api.get('/api/auth/profile');
-      if (response.data.status) {
-        return response.data.data.user;
+      const { body } = await http().post(`${apiUrl}/auth/profile`);
+      if (body.status) {
+        return body.data.user;
       }
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   };

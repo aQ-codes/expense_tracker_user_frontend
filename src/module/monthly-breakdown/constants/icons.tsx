@@ -4,7 +4,7 @@ import {
 } from '@/themes/images/icon';
 
 // ===== MONTHLY BREAKDOWN ICONS =====
-export const MONTHLY_BREAKDOWN_ICONS = {
+export const MONTHLY_BREAKDOWN_ICONS: Record<string, React.ComponentType> = {
   emptyChart: EmptyChartIcon
 };
 

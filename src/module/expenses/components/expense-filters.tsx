@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { SearchIcon, FilterIcon } from '@/themes/images/icon';
 import { Category } from '@/interfaces/expense';
 import { MONTHS } from '../constants';
 

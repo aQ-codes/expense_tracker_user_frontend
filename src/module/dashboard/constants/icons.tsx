@@ -9,7 +9,7 @@ import {
 } from '@/themes/images/icon';
 
 // ===== DASHBOARD ICONS =====
-export const DASHBOARD_ICONS = {
+export const DASHBOARD_ICONS: Record<string, React.ComponentType> = {
   totalExpense: TotalExpenseIcon,
   monthlyExpense: MonthlyExpenseIcon,
   averageExpense: AverageExpenseIcon,

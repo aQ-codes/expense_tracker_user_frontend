@@ -158,7 +158,7 @@ const LoginForm: React.FC = () => {
 
         {/* Sign Up Link */}
         <div className="text-center">
-          <span className="text-gray-600">Don't have an account? </span>
+          <span className="text-gray-600">Don&apos;t have an account? </span>
           <Link href="/signup" className="text-purple-600 hover:text-purple-700 underline font-medium">
             Signup
           </Link>

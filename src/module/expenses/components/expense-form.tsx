@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Expense } from '@/interfaces/expense';
+import { Category, Expense, BackendCategory } from '@/interfaces/expense';
 import useExpenseService from '../services/expense-service';
 
 interface ExpenseFormProps {
@@ -143,8 +143,17 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       if (response.status && response.data) {
         // The response.data should be a single category object
         const newCategory = response.data;
-        onCategoryCreated?.(newCategory);
-        setFormData(prev => ({ ...prev, category: newCategory.id }));
+        if (newCategory) {
+          // Convert BackendCategory to Category with default icon and color
+          const categoryWithUI: Category = {
+            id: newCategory._id,
+            name: newCategory.name,
+            color: '#6B7280', // Default gray color
+            icon: '💰' // Default money emoji icon
+          };
+          onCategoryCreated?.(categoryWithUI);
+          setFormData(prev => ({ ...prev, category: newCategory._id }));
+        }
         setNewCategoryName('');
         setIsAddingCategory(false);
         setCategoryError('');

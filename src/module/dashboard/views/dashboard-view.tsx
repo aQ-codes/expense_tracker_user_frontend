@@ -10,7 +10,7 @@ import ToastNotification from '../../../themes/components/toast-notification';
 import ExpenseModal from '../../expenses/components/expense-modal';
 import useDashboardService from '../services/dashboard-service';
 import useExpenseService from '../../expenses/services/expense-service';
-import { DashboardData, DashboardExpense } from '@/interfaces/expense';
+import { DashboardData, ExpenseWithCategory, Expense, Category } from '@/interfaces/expense';
 
 const DashboardView: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -37,8 +37,8 @@ const DashboardView: React.FC = () => {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<any>(null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [editingExpense, setEditingExpense] = useState<ExpenseWithCategory | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const dashboardService = useDashboardService();
   const expenseService = useExpenseService();
@@ -113,18 +113,18 @@ const DashboardView: React.FC = () => {
     }
   };
 
-  const handleEditExpense = (expense: DashboardExpense) => {
+  const handleEditExpense = (expense: ExpenseWithCategory) => {
     // The expense is already in the correct format, just set it directly
     setEditingExpense(expense);
     setIsModalOpen(true);
   };
 
-  const handleModalSubmit = async (expenseData: any) => {
+  const handleModalSubmit = async (expenseData: Omit<Expense, '_id'>) => {
     try {
       let response;
       if (editingExpense) {
         // Update existing expense - use _id from transformed expense
-        const expenseId = editingExpense._id;
+        const expenseId = editingExpense._id || '';
         response = await expenseService.updateExpense(expenseId, expenseData);
       } else {
         // Create new expense
@@ -139,20 +139,8 @@ const DashboardView: React.FC = () => {
         setIsModalOpen(false);
         setEditingExpense(null);
         
-        if (editingExpense) {
-          // Update local state for edit
-          setDashboardData(prevData => ({
-            ...prevData,
-            recentExpenses: prevData.recentExpenses.map(expense => 
-              expense._id === editingExpense._id 
-                ? { ...expense, ...expenseData }
-                : expense
-            )
-          }));
-        } else {
-          // Reload for new expense since we need the full data
-          loadDashboardData();
-        }
+        // Reload dashboard data to get the updated information
+        loadDashboardData();
       } else {
         showToast(response.message || 'Failed to save expense', 'error');
       }
@@ -195,8 +183,6 @@ const DashboardView: React.FC = () => {
         {/* Left Panel - Recent Expenses */}
         <RecentExpenses 
           expenses={dashboardData.recentExpenses}
-          onDelete={handleDeleteExpense}
-          onEdit={handleEditExpense}
         />
         
         {/* Right Panel - Expense Distribution Chart */}
@@ -219,7 +205,13 @@ const DashboardView: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSubmit={handleModalSubmit}
-        expense={editingExpense}
+        expense={editingExpense ? {
+          _id: editingExpense._id || '',
+          title: editingExpense.title,
+          amount: editingExpense.amount,
+          category: editingExpense.category.id,
+          date: editingExpense.date
+        } : null}
         categories={categories}
         mode={editingExpense ? 'edit' : 'add'}
       />

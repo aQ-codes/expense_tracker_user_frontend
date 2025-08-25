@@ -20,7 +20,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({
   className = "" 
 }) => {
   // Custom tooltip component
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
@@ -40,8 +40,8 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({
   };
 
   // Custom bar component with rounded corners
-  const CustomBar = (props: any) => {
-    const { x, y, width, height, index } = props;
+  const CustomBar = (props: unknown) => {
+    const { x, y, width, height, index } = props as { x: number; y: number; width: number; height: number; index: number };
     return (
       <g>
         <rect
@@ -80,7 +80,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({
             <Tooltip content={<CustomTooltip />} />
             <Bar 
               dataKey="amount" 
-              shape={<CustomBar />}
+              shape={CustomBar}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

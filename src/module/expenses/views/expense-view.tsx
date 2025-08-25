@@ -6,10 +6,10 @@ import ExpenseFilters from '../components/expense-filters';
 import ExpenseList from '../components/expense-list';
 import ExpenseModal from '../components/expense-modal';
 import ToastNotification from '../../../themes/components/toast-notification';
-import { Category, Expense, ExpenseWithCategory } from '@/interfaces/expense';
+import { Category, Expense, ExpenseWithCategory, BackendCategory } from '@/interfaces/expense';
 import useExpenseService from '../services/expense-service';
 import { getCategoryColor, MONTHS, formatDate } from '../constants';
-import { getCategoryIcon as getIcon } from '../constants/icons';
+import { getCategoryIcon as getIcon } from '@/themes/images/icon';
 import http from '@/utils/http';
 
 const ExpenseView: React.FC = () => {
@@ -63,7 +63,7 @@ const ExpenseView: React.FC = () => {
       if (response.status && response.data) {
         console.log('Raw categories data:', response.data);
         // Transform backend categories to frontend format with icons and colors
-        const transformedCategories: Category[] = response.data.map((backendCategory: any) => ({
+        const transformedCategories: Category[] = response.data.map((backendCategory: Category) => ({
           id: backendCategory.id,
           name: backendCategory.name,
           color: getCategoryColor(backendCategory.name),
@@ -84,7 +84,7 @@ const ExpenseView: React.FC = () => {
   const loadExpenses = async () => {
     try {
       setLoading(true);
-      const filters: any = {};
+      const filters: { category?: string; month?: string } = {};
       if (selectedCategory) filters.category = selectedCategory;
       if (selectedMonth) filters.month = selectedMonth;
 
@@ -95,30 +95,11 @@ const ExpenseView: React.FC = () => {
       );
 
       if (response.status && response.data) {
-        // Transform backend expenses to frontend format
-        const transformedExpenses: ExpenseWithCategory[] = response.data.map((backendExpense: any) => {
-          console.log('Backend expense data:', {
-            id: backendExpense._id,
-            title: backendExpense.title,
-            date: backendExpense.date,
-            formattedDate: backendExpense.formattedDate
-          });
-          
-          return {
-            _id: backendExpense._id,
-            title: backendExpense.title,
-            amount: backendExpense.amount,
-            date: backendExpense.date,
-            formattedDate: backendExpense.formattedDate || formatDate(backendExpense.date),
-            category: {
-              id: backendExpense.category._id,
-              name: backendExpense.category.name,
-              color: getCategoryColor(backendExpense.category.name),
-              icon: getIcon(backendExpense.category.name)
-            },
-            createdBy: backendExpense.createdBy
-          };
-        });
+        // Data is already in correct format, just ensure formattedDate is set
+        const transformedExpenses: ExpenseWithCategory[] = response.data.map((expense: ExpenseWithCategory) => ({
+          ...expense,
+          formattedDate: expense.formattedDate || formatDate(expense.date)
+        }));
 
         setExpenses(transformedExpenses);
         if (response.pagination) {
@@ -238,19 +219,20 @@ const ExpenseView: React.FC = () => {
 
   const handleExport = async () => {
     try {
-      const filters: any = {};
+      const filters: { category?: string; month?: string } = {};
       if (selectedCategory) filters.category = selectedCategory;
       if (selectedMonth) filters.month = selectedMonth;
 
       // Create the request payload
-      const payload = filters as any;
+      const payload = filters as unknown as JSON;
       
       // Use the existing HTTP utility to make the request
-      const { response } = await http().post('/api/expenses/export', payload);
+      const { body } = await http().post('/api/expenses/export', payload);
       
-      if (response.status === 200) {
+      if (body.status) {
         // Get the CSV content as blob
-        const blob = new Blob([response.data], { type: 'text/csv' });
+        const csvContent = body.data as string;
+        const blob = new Blob([csvContent], { type: 'text/csv' });
         
         // Create download link
         const url = window.URL.createObjectURL(blob);
@@ -284,18 +266,7 @@ const ExpenseView: React.FC = () => {
     setToast(prev => ({ ...prev, isVisible: false }));
   };
 
-  // Convert ExpenseWithCategory to ExpenseList format
-  const convertToExpenseListFormat = (expenseWithCategory: ExpenseWithCategory) => ({
-    _id: expenseWithCategory._id || '',
-    title: expenseWithCategory.title,
-    amount: expenseWithCategory.amount,
-    category: expenseWithCategory.category,
-    date: expenseWithCategory.date,
-    createdBy: expenseWithCategory.createdBy
-  });
 
-  const convertToExpenseListArray = (expenses: ExpenseWithCategory[]) => 
-    expenses.map(convertToExpenseListFormat);
 
   return (
     <div className="space-y-6">
@@ -316,7 +287,7 @@ const ExpenseView: React.FC = () => {
 
       {/* Expense List */}
       <ExpenseList
-        expenses={convertToExpenseListArray(expenses)}
+        expenses={expenses}
         onDelete={handleDeleteExpense}
         onEdit={handleEditExpense}
         onExport={handleExport}

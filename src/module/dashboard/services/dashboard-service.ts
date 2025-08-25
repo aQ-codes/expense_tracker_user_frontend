@@ -34,7 +34,7 @@ const useDashboardService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch dashboard data. Please try again.",
@@ -66,7 +66,7 @@ const useDashboardService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch dashboard statistics. Please try again.",
@@ -95,7 +95,7 @@ const useDashboardService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch recent expenses. Please try again.",
@@ -117,7 +117,7 @@ const useDashboardService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch expense distribution. Please try again.",
@@ -141,7 +141,7 @@ const useDashboardService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch monthly expenses data. Please try again.",

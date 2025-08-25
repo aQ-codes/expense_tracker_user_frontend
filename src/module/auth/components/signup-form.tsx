@@ -28,7 +28,7 @@ const SignupForm: React.FC = () => {
 
   const [errors, setErrors] = useState<SignupFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,28 +46,28 @@ const SignupForm: React.FC = () => {
     }
   };
 
-  const handleAvatarUpload = (file: File) => {
-    // Validate file type and size
-    if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, avatar: 'Please select an image file' }));
-      return;
-    }
+  // const handleAvatarUpload = (file: File) => {
+  //   // Validate file type and size
+  //   if (!file.type.startsWith('image/')) {
+  //     setErrors(prev => ({ ...prev, avatar: 'Please select an image file' }));
+  //     return;
+  //   }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      setErrors(prev => ({ ...prev, avatar: 'Image size should be less than 5MB' }));
-      return;
-    }
+  //   if (file.size > 5 * 1024 * 1024) { // 5MB limit
+  //     setErrors(prev => ({ ...prev, avatar: 'Image size should be less than 5MB' }));
+  //     return;
+  //   }
 
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file);
-    setAvatarPreview(previewUrl);
-    setFormData(prev => ({ ...prev, avatar: file }));
+  //   // Create preview URL
+  //   const previewUrl = URL.createObjectURL(file);
+  //   setAvatarPreview(previewUrl);
+  //   setFormData(prev => ({ ...prev, avatar: file }));
     
-    // Clear avatar error
-    if (errors.avatar) {
-      setErrors(prev => ({ ...prev, avatar: undefined }));
-    }
-  };
+  //   // Clear avatar error
+  //   if (errors.avatar) {
+  //     setErrors(prev => ({ ...prev, avatar: undefined }));
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

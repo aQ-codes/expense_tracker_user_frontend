@@ -1,6 +1,6 @@
 // date-formater.ts
 
-import { DatePickerData } from "@/interfaces/dashboard/dashboard";
+import { DatePickerData } from "@/interfaces/dashboard";
 
 
 // Format date (e.g., "Jan 1")

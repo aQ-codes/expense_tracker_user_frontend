@@ -30,6 +30,11 @@ export interface Expense {
   updatedAt?: string;
 }
 
+// Frontend expense interface with consistent id property
+export interface ExpenseWithId extends Omit<Expense, '_id'> {
+  id: string;
+}
+
 // Expense with populated category details
 export interface ExpenseWithCategory extends Omit<Expense, 'category'> {
   category: Category;
@@ -78,7 +83,7 @@ export interface PaginationInfo {
 }
 
 // API Response interfaces
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: boolean;
   message: string;
   data?: T;
@@ -149,7 +154,7 @@ export interface DashboardStats {
 
 export interface DashboardData {
   stats: DashboardStats;
-  recentExpenses: DashboardExpense[];
+  recentExpenses: ExpenseWithCategory[];
   expenseDistribution: CategoryDistributionData[];
   monthlyExpensesData: ExpenseData[];
 }

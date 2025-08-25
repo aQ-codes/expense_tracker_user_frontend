@@ -5,7 +5,7 @@ import { ExpenseWithCategory } from "@/interfaces/expense";
 interface MonthlyBreakdownResponse {
   status: boolean;
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 interface MonthlyBreakdownDataResponse {
@@ -54,7 +54,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch monthly breakdown. Please try again.",
@@ -96,7 +96,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch monthly summary. Please try again."
@@ -133,7 +133,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch monthly expenses. Please try again."
@@ -164,7 +164,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch category distribution. Please try again."
@@ -195,7 +195,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch daily breakdown. Please try again."
@@ -226,7 +226,7 @@ const useMonthlyBreakdownService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to export monthly expenses. Please try again."

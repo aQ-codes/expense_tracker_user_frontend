@@ -27,7 +27,7 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
     return `${day} ${month}`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white shadow-md rounded-lg p-2 border border-gray-200">

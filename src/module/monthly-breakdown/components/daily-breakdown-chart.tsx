@@ -30,7 +30,7 @@ const DailyBreakdownChart: React.FC<DailyBreakdownChartProps> = ({
     displayDate: item.formattedDate || new Date(item.date).toLocaleDateString()
   }));
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">

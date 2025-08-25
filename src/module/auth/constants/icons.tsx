@@ -5,7 +5,7 @@ import {
 } from '@/themes/images/icon';
 
 // ===== AUTH ICONS =====
-export const AUTH_ICONS = {
+export const AUTH_ICONS: Record<string, React.ComponentType> = {
   eye: EyeIcon,
   eyeOff: EyeOffIcon
 };

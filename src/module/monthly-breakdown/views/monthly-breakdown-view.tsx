@@ -18,7 +18,17 @@ const MonthlyBreakdownView: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
   // State for data
-  const [monthlyData, setMonthlyData] = useState({
+  const [monthlyData, setMonthlyData] = useState<{
+    summary: {
+      totalSpent: number;
+      totalExpenses: number;
+      averagePerDay: number;
+      daysInMonth: number;
+    };
+    expenses: ExpenseWithCategory[];
+    categoryDistribution: { name: string; value: number; color: string; }[];
+    dailyBreakdown: { date: string; amount: number; }[];
+  }>({
     summary: {
       totalSpent: 0,
       totalExpenses: 0,
@@ -133,7 +143,7 @@ const MonthlyBreakdownView: React.FC = () => {
     }
   }, [selectedMonth, selectedYear]); // Add dependencies for the callback
 
-  const handleEditExpense = useCallback((expense: any) => {
+  const handleEditExpense = useCallback((expense: ExpenseWithCategory) => {
     // In a real app, this would open an edit modal
     console.log('Edit expense:', expense);
   }, []);
@@ -143,7 +153,7 @@ const MonthlyBreakdownView: React.FC = () => {
       const response = await monthlyBreakdownService.exportMonthlyExpenses(selectedMonth, selectedYear);
       if (response.status) {
         // Create and download CSV file
-        const csvContent = response.data;
+        const csvContent = response.data as string;
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

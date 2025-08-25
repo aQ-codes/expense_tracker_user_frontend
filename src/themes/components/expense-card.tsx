@@ -2,25 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { DeleteIcon, EditIcon } from '@/themes/images/icon';
+import { ExpenseWithCategory } from '@/interfaces/expense';
 
 interface ExpenseCardProps {
-  expense: {
-    _id?: string;
-    id?: string;
-    title: string;
-    amount: number;
-    date: string;
-    formattedDate?: string;
-    category: {
-      name: string;
-      color: string;
-      icon?: React.ReactNode;
-      _id?: string;
-    } | string;
-    categoryColor?: string;
-  };
+  expense: ExpenseWithCategory;
   onDelete?: (expenseId: string) => void;
-  onEdit?: (expense: any) => void;
+  onEdit?: (expense: ExpenseWithCategory) => void;
   showActions?: boolean;
   className?: string;
   variant?: 'list' | 'recent';
@@ -36,13 +23,13 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
-  // Get the expense ID (handle both _id and id properties)
-  const expenseId = expense._id || expense.id || '';
+  // Get the expense ID
+  const expenseId = expense._id || '';
   
-  // Get category info (handle both object and string formats)
-  const categoryName = typeof expense.category === 'string' ? expense.category : expense.category.name;
-  const categoryColor = typeof expense.category === 'string' ? expense.categoryColor : expense.category.color;
-  const categoryIcon = typeof expense.category === 'string' ? null : expense.category.icon;
+  // Get category info (ExpenseWithCategory always has category as Category object)
+  const categoryName = expense.category.name;
+  const categoryColor = expense.category.color;
+  const categoryIcon = expense.category.icon;
   
   // State for dynamic icon loading
   const [dynamicIcon, setDynamicIcon] = useState<React.ReactNode>(null);

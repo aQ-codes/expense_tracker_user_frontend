@@ -1,11 +1,17 @@
 import http from "@/utils/http";
-import { Expense, ExpenseWithCategory, Category } from "@/interfaces/expense";
+import { Expense, ExpenseWithCategory, Category, BackendCategory } from "@/interfaces/expense";
 
 // Response interfaces
 interface ExpenseResponse {
   status: boolean;
   message: string;
-  data?: any;
+  data?: ExpenseWithCategory;
+}
+
+interface CategoryResponse {
+  status: boolean;
+  message: string;
+  data?: BackendCategory;
 }
 
 interface ExpenseListResponse {
@@ -79,7 +85,7 @@ const useExpenseService = () => {
         data: body.data,
         pagination: body.pagination
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch expenses. Please try again.",
@@ -103,7 +109,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch expense. Please try again."
@@ -126,7 +132,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to create expense. Please try again."
@@ -153,7 +159,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to update expense. Please try again."
@@ -175,7 +181,7 @@ const useExpenseService = () => {
         status: body.status,
         message: body.message
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to delete expense. Please try again."
@@ -201,7 +207,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch expense statistics. Please try again.",
@@ -227,7 +233,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch categories. Please try again.",
@@ -241,7 +247,7 @@ const useExpenseService = () => {
    * @param categoryName - The name of the category to create
    * @returns Promise resolving to creation response
    */
-  const createCategory = async (categoryName: string): Promise<ExpenseResponse> => {
+  const createCategory = async (categoryName: string): Promise<CategoryResponse> => {
     try {
       const payload: JSON = <JSON>(<unknown>{ name: categoryName });
       const { body } = await http().post(`${apiUrl}/categories/create`, payload);
@@ -251,7 +257,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to create category. Please try again."
@@ -277,7 +283,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to fetch chart data. Please try again.",
@@ -304,7 +310,7 @@ const useExpenseService = () => {
         message: body.message,
         data: body.data
       };
-    } catch (error) {
+    } catch {
       return {
         status: false,
         message: "Failed to export expenses. Please try again."

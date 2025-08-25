@@ -2,20 +2,16 @@ import React from 'react';
 import { RecentExpensesIcon } from '@/themes/images/icon';
 import Link from 'next/link';
 import ExpenseCard from '@/themes/components/expense-card';
-import { DashboardExpense } from '@/interfaces/expense';
+import { ExpenseWithCategory } from '@/interfaces/expense';
 
 interface RecentExpensesProps {
-  expenses: DashboardExpense[];
+  expenses: ExpenseWithCategory[];
   className?: string;
-  onDelete?: (expenseId: string) => void;
-  onEdit?: (expense: any) => void;
 }
 
 const RecentExpenses: React.FC<RecentExpensesProps> = ({ 
   expenses, 
-  className = "",
-  onDelete,
-  onEdit
+  className = ""
 }) => {
   return (
     <div className={`bg-white rounded-xl p-6 shadow-lg ${className}`}>
@@ -38,9 +34,7 @@ const RecentExpenses: React.FC<RecentExpensesProps> = ({
             key={expense._id}
             expense={expense}
             variant="recent"
-            showActions={true}
-            onDelete={onDelete}
-            onEdit={onEdit}
+            showActions={false}
           />
         ))}
       </div>

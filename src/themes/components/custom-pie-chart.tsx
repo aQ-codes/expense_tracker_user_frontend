@@ -23,7 +23,7 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   // Custom tooltip component
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; value: number } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const percentage = ((data.value / total) * 100).toFixed(1);
@@ -44,10 +44,10 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
   };
 
   // Custom legend component
-  const CustomLegend = ({ payload }: any) => {
+  const CustomLegend = ({ payload }: { payload?: Array<{ value: string; color: string }> }) => {
     return (
       <div className="flex flex-wrap gap-4 justify-center mt-4">
-        {payload?.map((entry: any, index: number) => (
+        {payload?.map((entry, index: number) => (
           <div key={index} className="flex items-center">
             <div 
               className="w-4 h-4 rounded-full mr-2"
