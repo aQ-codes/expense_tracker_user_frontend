@@ -99,34 +99,9 @@ const DashboardView: React.FC = () => {
     }
   };
 
-  const handleDeleteExpense = async (expenseId: string) => {
-    try {
-      const response = await expenseService.deleteExpense(expenseId);
-      if (response.status) {
-        showToast('Expense deleted successfully', 'success');
-        // Update local state instead of reloading entire dashboard
-        setDashboardData(prevData => ({
-          ...prevData,
-          recentExpenses: prevData.recentExpenses.filter(expense => expense._id !== expenseId),
-          stats: {
-            ...prevData.stats,
-            totalExpenses: prevData.stats.totalExpenses - 1
-          }
-        }));
-      } else {
-        showToast(response.message || 'Failed to delete expense', 'error');
-      }
-    } catch (error) {
-      console.error('Error deleting expense:', error);
-      showToast('Failed to delete expense', 'error');
-    }
-  };
 
-  const handleEditExpense = (expense: ExpenseWithCategory) => {
-    // The expense is already in the correct format, just set it directly
-    setEditingExpense(expense);
-    setIsModalOpen(true);
-  };
+
+
 
   const handleModalSubmit = async (expenseData: Omit<Expense, '_id'>) => {
     try {

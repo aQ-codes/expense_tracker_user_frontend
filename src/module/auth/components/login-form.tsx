@@ -142,7 +142,7 @@ const LoginForm: React.FC = () => {
           onChange={handleInputChange}
           error={errors.password}
           required
-          showPasswordToggle
+
         />
 
         {/* Login Button */}

@@ -152,7 +152,6 @@ const SignupForm: React.FC = () => {
           onChange={handleInputChange}
           error={errors.password}
           required
-          showPasswordToggle
         />
 
         {/* Confirm Password Field */}
@@ -166,7 +165,6 @@ const SignupForm: React.FC = () => {
           onChange={handleInputChange}
           error={errors.confirmPassword}
           required
-          showPasswordToggle
         />
 
         {/* Signup Button */}

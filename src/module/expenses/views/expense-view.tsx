@@ -6,10 +6,9 @@ import ExpenseFilters from '../components/expense-filters';
 import ExpenseList from '../components/expense-list';
 import ExpenseModal from '../components/expense-modal';
 import ToastNotification from '../../../themes/components/toast-notification';
-import { Category, Expense, ExpenseWithCategory, BackendCategory } from '@/interfaces/expense';
+import { Category, Expense, ExpenseWithCategory } from '@/interfaces/expense';
 import useExpenseService from '../services/expense-service';
-import { getCategoryColor, MONTHS, formatDate } from '../constants';
-import { getCategoryIcon as getIcon } from '@/themes/images/icon';
+import { getCategoryColor, formatDate } from '../constants';
 
 // Helper function to get category icon as string
 const getCategoryIconString = (categoryName: string): string => {
@@ -81,23 +80,23 @@ const ExpenseView: React.FC = () => {
       const response = await expenseService.getCategories();
       
       if (response.status && response.data) {
-        // Transform backend categories to frontend format with icons and colors
-        const transformedCategories: Category[] = response.data
-          .filter((backendCategory: any) => {
-            // Check for different possible ID field names
-            const hasId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
-            return hasId;
-          })
-          .map((backendCategory: any) => {
-            // Use the first available ID field
-            const categoryId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
-            return {
-              id: categoryId,
-              name: backendCategory.name,
-              color: getCategoryColor(backendCategory.name),
-              icon: getCategoryIconString(backendCategory.name) // Use string-based icon function
-            };
-          });
+                 // Transform backend categories to frontend format with icons and colors
+         const transformedCategories: Category[] = response.data
+           .filter((backendCategory: { _id?: string; id?: string; categoryId?: string; name: string }) => {
+             // Check for different possible ID field names
+             const hasId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
+             return hasId;
+           })
+           .map((backendCategory: { _id?: string; id?: string; categoryId?: string; name: string }) => {
+             // Use the first available ID field
+             const categoryId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
+             return {
+               id: categoryId!,
+               name: backendCategory.name,
+               color: getCategoryColor(backendCategory.name),
+               icon: getCategoryIconString(backendCategory.name) // Use string-based icon function
+             };
+           });
         setCategories(transformedCategories);
       } else {
         setCategories([]);
@@ -152,19 +151,7 @@ const ExpenseView: React.FC = () => {
     }
   };
 
-  // Get chart data
-  const getChartData = async () => {
-    try {
-      const response = await expenseService.getChartData();
-      if (response.status && response.data) {
-        // Backend returns daily data with 'date' property, no mapping needed
-        return response.data.monthlyData;
-      }
-    } catch (error) {
-      console.error('Error loading chart data:', error);
-    }
-    return [];
-  };
+
 
   // Load chart data
   const loadChartData = async () => {
@@ -340,18 +327,17 @@ const ExpenseView: React.FC = () => {
       />
 
       {/* Expense List */}
-      <ExpenseList
-        expenses={expenses}
-        onDelete={handleDeleteExpense}
-        onEdit={handleEditExpense}
-        onExport={handleExport}
-        currentPage={pagination.page}
-        totalPages={pagination.totalPages}
-        onPageChange={handlePageChange}
-        totalItems={pagination.total}
-        itemsPerPage={pagination.limit}
-        loading={loading}
-      />
+             <ExpenseList
+         expenses={expenses}
+         onDelete={handleDeleteExpense}
+         onEdit={handleEditExpense}
+         onExport={handleExport}
+         currentPage={pagination.page}
+         onPageChange={handlePageChange}
+         totalItems={pagination.total}
+         itemsPerPage={pagination.limit}
+         loading={loading}
+       />
 
       {/* Modal */}
       <ExpenseModal

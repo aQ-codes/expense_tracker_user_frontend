@@ -40,7 +40,7 @@ const MonthlyBreakdownView: React.FC = () => {
     dailyBreakdown: []
   });
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+
   
   // Toast state
   const [toast, setToast] = useState({
@@ -68,7 +68,7 @@ const MonthlyBreakdownView: React.FC = () => {
               color: '#6B7280', // Default color
               icon: '💰' // Default icon
             }));
-          setCategories(transformedCategories);
+
         }
       } catch (error) {
         console.error('Error loading categories:', error);
@@ -152,10 +152,7 @@ const MonthlyBreakdownView: React.FC = () => {
     }
   }, [selectedMonth, selectedYear]); // Add dependencies for the callback
 
-  const handleEditExpense = useCallback((expense: ExpenseWithCategory) => {
-    // In a real app, this would open an edit modal
 
-  }, []);
 
   const handleExport = useCallback(async () => {
     try {
@@ -251,7 +248,7 @@ const MonthlyBreakdownView: React.FC = () => {
       <ExpenseList
         expenses={expenseListData}
         onDelete={handleDeleteExpense}
-        onEdit={handleEditExpense}
+        onEdit={() => {}}
         onExport={handleExport}
         className=""
       />

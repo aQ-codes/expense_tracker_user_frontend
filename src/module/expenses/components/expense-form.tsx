@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Expense, ExpenseWithCategory, BackendCategory } from '@/interfaces/expense';
+import { Category, Expense, ExpenseWithCategory } from '@/interfaces/expense';
 import useExpenseService from '../services/expense-service';
 
 interface ExpenseFormProps {
@@ -173,9 +173,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       } else {
         setCategoryError(response.message || 'Failed to create category');
       }
-    } catch (error) {
-      setCategoryError('Failed to create category');
-    }
+         } catch {
+       setCategoryError('Failed to create category');
+     }
   };
 
   const generateCalendarDays = (year: number, month: number) => {

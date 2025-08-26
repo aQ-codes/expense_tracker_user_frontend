@@ -32,7 +32,7 @@ const SideNavbar: React.FC<SideNavbarProps> = ({ onClose }) => {
         } else {
           setUser(null);
         }
-      } catch (error) {
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);

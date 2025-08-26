@@ -5,7 +5,7 @@ interface PaginationProps {
   pageSize: number;
   current: number;
   onChange: (page: number) => void;
-  showSizeChanger?: boolean;
+
   className?: string;
   loading?: boolean;
 }
@@ -15,7 +15,7 @@ const Pagination: React.FC<PaginationProps> = ({
   pageSize,
   current,
   onChange,
-  showSizeChanger = false,
+
   className = '',
   loading = false,
 }) => {

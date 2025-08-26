@@ -156,8 +156,8 @@ export const useAuthService = () => {
         status: true,
         message: 'Logged out successfully'
       };
-    } catch (error: unknown) {
-      console.error('Auth service: Logout error:', error);
+    } catch {
+      console.error('Auth service: Logout error');
       
       return {
         status: true,
@@ -218,7 +218,7 @@ export const useAuthService = () => {
         return body.data.user;
       }
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   };

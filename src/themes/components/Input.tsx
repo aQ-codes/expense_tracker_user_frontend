@@ -14,7 +14,7 @@ interface InputProps {
   required?: boolean;
   disabled?: boolean;
   className?: string;
-  showPasswordToggle?: boolean;
+
 }
 
 const Input: React.FC<InputProps> = ({
@@ -30,7 +30,7 @@ const Input: React.FC<InputProps> = ({
   required = false,
   disabled = false,
   className = '',
-  showPasswordToggle = false,
+
 }) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const inputType = type === 'password' && showPassword ? 'text' : type;

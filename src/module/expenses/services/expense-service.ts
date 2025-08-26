@@ -1,5 +1,5 @@
 import http from "@/utils/http";
-import { Expense, ExpenseWithCategory, Category, BackendCategory } from "@/interfaces/expense";
+import { Expense, ExpenseWithCategory, BackendCategory } from "@/interfaces/expense";
 
 // Response interfaces
 interface ExpenseResponse {

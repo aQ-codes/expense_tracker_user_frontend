@@ -13,7 +13,7 @@ interface ExpenseListProps {
   onExport: () => void;
   className?: string;
   currentPage?: number;
-  totalPages?: number;
+
   onPageChange?: (page: number) => void;
   totalItems?: number;
   itemsPerPage?: number;
@@ -27,7 +27,6 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   onExport,
   className = "",
   currentPage = 1,
-  totalPages = 1,
   onPageChange,
   totalItems = 0,
   itemsPerPage = 10,
