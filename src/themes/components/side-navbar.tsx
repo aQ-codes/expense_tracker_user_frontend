@@ -30,11 +30,9 @@ const SideNavbar: React.FC<SideNavbarProps> = ({ onClose }) => {
         if (userData && userData.name && userData.email) {
           setUser(userData);
         } else {
-  
           setUser(null);
         }
       } catch (error) {
-        console.error('Error fetching user:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -42,7 +40,7 @@ const SideNavbar: React.FC<SideNavbarProps> = ({ onClose }) => {
     };
 
     fetchUser();
-  }, [getCurrentUser]);
+  }, []); // Remove getCurrentUser from dependencies to prevent infinite loops
 
   const navItems: NavItem[] = [
     {

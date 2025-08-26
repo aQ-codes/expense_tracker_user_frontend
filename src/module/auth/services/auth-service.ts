@@ -10,8 +10,6 @@ export interface AuthResponse {
   status: boolean;
   message: string;
   data?: {
-    user?: User;
-    token?: string;
     errors?: SignupFormErrors;
   };
 }
@@ -173,7 +171,7 @@ export const useAuthService = () => {
    */
   const getProfile = async (): Promise<{ status: boolean; data?: User; message: string }> => {
     try {
-      const { body } = await http().get(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/user/profile`);
 
       if (body.status) {
         return {
@@ -203,7 +201,7 @@ export const useAuthService = () => {
    */
   const isAuthenticated = async (): Promise<boolean> => {
     try {
-      const { body } = await http().get(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/user/profile`);
       return body.status;
     } catch {
       return false;
@@ -215,12 +213,12 @@ export const useAuthService = () => {
    */
   const getCurrentUser = async (): Promise<User | null> => {
     try {
-      const { body } = await http().get(`${apiUrl}/auth/profile`);
+      const { body } = await http().get(`${apiUrl}/user/profile`);
       if (body.status) {
         return body.data.user;
       }
       return null;
-    } catch {
+    } catch (error) {
       return null;
     }
   };
