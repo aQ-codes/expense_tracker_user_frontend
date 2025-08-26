@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Expense, BackendCategory } from '@/interfaces/expense';
+import { Category, Expense, ExpenseWithCategory, BackendCategory } from '@/interfaces/expense';
 import useExpenseService from '../services/expense-service';
 
 interface ExpenseFormProps {
   onSubmit: (expense: Omit<Expense, '_id'>) => void;
   onCancel: () => void;
-  expense?: Expense | null;
+  expense?: Expense | ExpenseWithCategory | null;
   categories: Category[];
   mode: 'add' | 'edit';
   onCategoryCreated?: (newCategory: Category) => void;
@@ -50,10 +50,23 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
       }
       
+      // Handle category properly - check if it's ExpenseWithCategory or regular Expense
+      let categoryId = '';
+      if ('category' in expense) {
+        // Check if category is an object (ExpenseWithCategory) or string (Expense)
+        if (typeof expense.category === 'object' && expense.category !== null) {
+          // It's ExpenseWithCategory - category is an object
+          categoryId = (expense.category as Category).id;
+        } else {
+          // It's regular Expense - category is a string ID
+          categoryId = expense.category as string;
+        }
+      }
+      
       setFormData({
         title: expense.title,
         amount: expense.amount,
-        category: expense.category,
+        category: categoryId,
         date: displayDate
       });
       setAmountInput(expense.amount.toString());
@@ -227,9 +240,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
               errors.category ? 'border-red-500' : 'border-gray-300'
             }`}
           >
-            <option value="">Select Category</option>
+            <option value="">
+              {categories.length === 0 ? 'Loading categories...' : 'Select Category'}
+            </option>
             {categories.map((category) => (
-              <option key={category.id || category.name} value={category.id}>
+              <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}

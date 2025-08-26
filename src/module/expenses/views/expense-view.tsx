@@ -10,6 +10,20 @@ import { Category, Expense, ExpenseWithCategory, BackendCategory } from '@/inter
 import useExpenseService from '../services/expense-service';
 import { getCategoryColor, MONTHS, formatDate } from '../constants';
 import { getCategoryIcon as getIcon } from '@/themes/images/icon';
+
+// Helper function to get category icon as string
+const getCategoryIconString = (categoryName: string): string => {
+  const iconMap: Record<string, string> = {
+    'Food': '🍕',
+    'Travel': '✈️',
+    'Bills': '📄',
+    'Shopping': '🛍️',
+    'Transport': '🚗',
+    'Education': '📚',
+    'Others': '💰'
+  };
+  return iconMap[categoryName] || '💰';
+};
 import http from '@/utils/http';
 
 const ExpenseView: React.FC = () => {
@@ -22,6 +36,7 @@ const ExpenseView: React.FC = () => {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editingExpense, setEditingExpense] = useState<ExpenseWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [chartData, setChartData] = useState<Array<{ date: string; amount: number }>>([]);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -62,23 +77,37 @@ const ExpenseView: React.FC = () => {
   // Load categories from backend
   const loadCategories = async () => {
     try {
+      setCategoriesLoading(true);
       const response = await expenseService.getCategories();
       
       if (response.status && response.data) {
         // Transform backend categories to frontend format with icons and colors
         const transformedCategories: Category[] = response.data
-          .filter((backendCategory: BackendCategory) => backendCategory._id) // Filter out categories without IDs
-          .map((backendCategory: BackendCategory) => ({
-            id: backendCategory._id,
-            name: backendCategory.name,
-            color: getCategoryColor(backendCategory.name),
-            icon: getIcon(backendCategory.name)
-          }));
+          .filter((backendCategory: any) => {
+            // Check for different possible ID field names
+            const hasId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
+            return hasId;
+          })
+          .map((backendCategory: any) => {
+            // Use the first available ID field
+            const categoryId = backendCategory._id || backendCategory.id || backendCategory.categoryId;
+            return {
+              id: categoryId,
+              name: backendCategory.name,
+              color: getCategoryColor(backendCategory.name),
+              icon: getCategoryIconString(backendCategory.name) // Use string-based icon function
+            };
+          });
         setCategories(transformedCategories);
+      } else {
+        setCategories([]);
       }
     } catch (error) {
       console.error('Error loading categories:', error);
       showToast('Failed to load categories', 'error');
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
@@ -157,15 +186,43 @@ const ExpenseView: React.FC = () => {
 
   // Handlers
   const handleAddExpense = () => {
-    setModalMode('add');
-    setEditingExpense(null);
-    setIsModalOpen(true);
+    if (categoriesLoading) {
+      showToast('Please wait while categories are loading...', 'info');
+      return;
+    }
+    
+    if (categories.length === 0) {
+      // Set modal state first, then load categories
+      setModalMode('add');
+      setEditingExpense(null);
+      setIsModalOpen(true);
+      // Load categories in background
+      loadCategories();
+    } else {
+      setModalMode('add');
+      setEditingExpense(null);
+      setIsModalOpen(true);
+    }
   };
 
   const handleEditExpense = (expense: ExpenseWithCategory) => {
-    setModalMode('edit');
-    setEditingExpense(expense);
-    setIsModalOpen(true);
+    if (categoriesLoading) {
+      showToast('Please wait while categories are loading...', 'info');
+      return;
+    }
+    
+    if (categories.length === 0) {
+      // Set modal state first, then load categories
+      setModalMode('edit');
+      setEditingExpense(expense);
+      setIsModalOpen(true);
+      // Load categories in background
+      loadCategories();
+    } else {
+      setModalMode('edit');
+      setEditingExpense(expense);
+      setIsModalOpen(true);
+    }
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
@@ -308,7 +365,7 @@ const ExpenseView: React.FC = () => {
           category: editingExpense.category.id,
           date: editingExpense.date
         } : null}
-        categories={categories}
+        categories={categories || []}
         mode={modalMode}
         onCategoryCreated={handleCategoryCreated}
       />

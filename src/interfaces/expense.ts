@@ -15,7 +15,7 @@ export interface Category {
   id: string;
   name: string;
   color: string;
-  icon: React.ReactNode;
+  icon: string; // Changed from React.ReactNode to string
 }
 
 // Basic expense interface (what comes from API)
