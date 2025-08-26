@@ -6,7 +6,7 @@ import MonthlySummary from '../components/monthly-summary';
 import ExpenseList from '../../expenses/components/expense-list';
 import DailyBreakdownChart from '../components/daily-breakdown-chart';
 import CategoryDistributionChart from '../components/category-distribution-chart';
-import { Category, ExpenseWithCategory } from '@/interfaces/expense';
+import { Category, ExpenseWithCategory, BackendCategory } from '@/interfaces/expense';
 import useMonthlyBreakdownService from '../services/monthly-breakdown-service';
 import useExpenseService from '../../expenses/services/expense-service';
 import ToastNotification from '@/themes/components/toast-notification';
@@ -58,8 +58,17 @@ const MonthlyBreakdownView: React.FC = () => {
     const loadCategories = async () => {
       try {
         const response = await expenseService.getCategories();
-        if (response.status) {
-          setCategories(response.data);
+        if (response.status && response.data) {
+          // Transform backend categories to frontend format
+          const transformedCategories: Category[] = response.data
+            .filter((backendCategory: BackendCategory) => backendCategory._id)
+            .map((backendCategory: BackendCategory) => ({
+              id: backendCategory._id,
+              name: backendCategory.name,
+              color: '#6B7280', // Default color
+              icon: '💰' // Default icon
+            }));
+          setCategories(transformedCategories);
         }
       } catch (error) {
         console.error('Error loading categories:', error);

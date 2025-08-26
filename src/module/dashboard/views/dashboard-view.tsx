@@ -10,7 +10,7 @@ import ToastNotification from '../../../themes/components/toast-notification';
 import ExpenseModal from '../../expenses/components/expense-modal';
 import useDashboardService from '../services/dashboard-service';
 import useExpenseService from '../../expenses/services/expense-service';
-import { DashboardData, ExpenseWithCategory, Expense, Category } from '@/interfaces/expense';
+import { DashboardData, ExpenseWithCategory, Expense, Category, BackendCategory } from '@/interfaces/expense';
 
 const DashboardView: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,16 @@ const DashboardView: React.FC = () => {
     try {
       const response = await expenseService.getCategories();
       if (response.status && response.data) {
-        setCategories(response.data);
+        // Transform backend categories to frontend format
+        const transformedCategories: Category[] = response.data
+          .filter((backendCategory: BackendCategory) => backendCategory._id)
+          .map((backendCategory: BackendCategory) => ({
+            id: backendCategory._id,
+            name: backendCategory.name,
+            color: '#6B7280', // Default color
+            icon: '💰' // Default icon
+          }));
+        setCategories(transformedCategories);
       }
     } catch (error) {
       console.error('Error loading categories:', error);

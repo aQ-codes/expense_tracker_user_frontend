@@ -39,7 +39,7 @@ interface ExpenseStatsResponse {
 interface CategoryListResponse {
   status: boolean;
   message: string;
-  data: Category[];
+  data: BackendCategory[];
 }
 
 interface ChartDataResponse {

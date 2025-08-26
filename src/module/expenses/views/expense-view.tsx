@@ -25,7 +25,7 @@ const ExpenseView: React.FC = () => {
   const [chartData, setChartData] = useState<Array<{ date: string; amount: number }>>([]);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 10,
+    limit: 3, // Temporarily reduced to 3 to test pagination with 5 items
     total: 0,
     totalPages: 1
   });
@@ -50,8 +50,14 @@ const ExpenseView: React.FC = () => {
 
   // Load expenses when filters change
   useEffect(() => {
+    // Reset to page 1 when filters change
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, [selectedCategory, selectedMonth]);
+
+  // Load expenses when pagination changes or on initial load
+  useEffect(() => {
     loadExpenses();
-  }, [selectedCategory, selectedMonth, pagination.page]);
+  }, [pagination.page, selectedCategory, selectedMonth]);
 
   // Load categories from backend
   const loadCategories = async () => {
@@ -60,12 +66,14 @@ const ExpenseView: React.FC = () => {
       
       if (response.status && response.data) {
         // Transform backend categories to frontend format with icons and colors
-        const transformedCategories: Category[] = response.data.map((backendCategory: Category) => ({
-          id: backendCategory.id,
-          name: backendCategory.name,
-          color: getCategoryColor(backendCategory.name),
-          icon: getIcon(backendCategory.name)
-        }));
+        const transformedCategories: Category[] = response.data
+          .filter((backendCategory: BackendCategory) => backendCategory._id) // Filter out categories without IDs
+          .map((backendCategory: BackendCategory) => ({
+            id: backendCategory._id,
+            name: backendCategory.name,
+            color: getCategoryColor(backendCategory.name),
+            icon: getIcon(backendCategory.name)
+          }));
         setCategories(transformedCategories);
       }
     } catch (error) {
@@ -285,6 +293,7 @@ const ExpenseView: React.FC = () => {
         onPageChange={handlePageChange}
         totalItems={pagination.total}
         itemsPerPage={pagination.limit}
+        loading={loading}
       />
 
       {/* Modal */}

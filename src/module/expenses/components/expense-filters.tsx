@@ -65,7 +65,7 @@ const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
               </button>
               {categories.map((category) => (
                 <button
-                  key={category.id}
+                  key={category.id || category.name}
                   onClick={() => {
                     onCategoryChange(category.id);
                     setIsCategoryOpen(false);

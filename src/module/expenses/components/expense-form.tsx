@@ -229,7 +229,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           >
             <option value="">Select Category</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.id}>
+              <option key={category.id || category.name} value={category.id}>
                 {category.name}
               </option>
             ))}
