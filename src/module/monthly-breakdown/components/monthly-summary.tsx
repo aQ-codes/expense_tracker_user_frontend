@@ -32,14 +32,14 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Total Spent */}
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <h3 className="text-sm font-medium text-red-600 mb-2">Total Spent</h3>
             <p className="text-2xl font-bold text-red-700">
-              ${totalSpent.toLocaleString()}
+              ₹{totalSpent.toLocaleString()}
             </p>
             <p className="text-sm text-red-600 mt-1">
               {getMonthName(selectedMonth)} {selectedYear}
@@ -65,7 +65,7 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 className="text-sm font-medium text-green-600 mb-2">Daily Average</h3>
             <p className="text-2xl font-bold text-green-700">
-              ${averagePerDay.toFixed(2)}
+              ₹{averagePerDay.toFixed(2)}
             </p>
             <p className="text-sm text-green-600 mt-1">
               per day ({daysInMonth} days)
@@ -79,7 +79,7 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({
         <div className="mt-6">
           <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
             <span>Monthly Spending Progress</span>
-            <span>${totalSpent.toLocaleString()} / ${(totalSpent * 1.2).toLocaleString()}</span>
+            <span>₹{totalSpent.toLocaleString()} / ₹{(totalSpent * 1.2).toLocaleString()}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 

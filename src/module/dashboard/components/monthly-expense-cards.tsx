@@ -24,7 +24,7 @@ const MonthlyExpenseCards: React.FC<MonthlyExpenseCardsProps> = ({
           <div>
             <p className="text-sm text-gray-600 mb-1">This Month</p>
             <p className="text-2xl font-bold text-gray-900">
-              ${thisMonth.toLocaleString()}
+              ₹{thisMonth.toLocaleString()}
             </p>
           </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -42,11 +42,11 @@ const MonthlyExpenseCards: React.FC<MonthlyExpenseCardsProps> = ({
           <div>
             <p className="text-sm text-gray-600 mb-1">Last Month</p>
             <p className="text-2xl font-bold text-gray-900">
-              ${lastMonth.toLocaleString()}
+              ₹{lastMonth.toLocaleString()}
             </p>
           </div>
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <AverageExpenseIcon />
+          <MonthlyExpenseIcon />
           </div>
         </div>
         <div className="flex items-center">

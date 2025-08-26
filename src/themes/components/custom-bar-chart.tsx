@@ -26,7 +26,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
           <p className="font-semibold text-gray-900">{label}</p>
           <p className="text-sm text-gray-600">
-            Amount: <span className="font-medium">${payload[0].value.toLocaleString()}</span>
+            Amount: <span className="font-medium">₹{payload[0].value.toLocaleString()}</span>
           </p>
         </div>
       );
@@ -75,7 +75,7 @@ const CustomBarChart: React.FC<CustomBarChartProps> = ({
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#6b7280' }}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) => `₹${value}`}
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar 

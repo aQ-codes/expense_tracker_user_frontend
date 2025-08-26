@@ -33,7 +33,7 @@ const CategoryDistributionChart: React.FC<CategoryDistributionChartProps> = ({
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="text-sm font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-purple-600">
-            ${data.value.toLocaleString()} ({percentage}%)
+            ₹{data.value.toLocaleString()} ({percentage}%)
           </p>
         </div>
       );

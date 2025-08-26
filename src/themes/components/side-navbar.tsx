@@ -12,7 +12,11 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const SideNavbar: React.FC = () => {
+interface SideNavbarProps {
+  onClose?: () => void;
+}
+
+const SideNavbar: React.FC<SideNavbarProps> = ({ onClose }) => {
   const pathname = usePathname();
   const { getCurrentUser } = useAuthService();
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
@@ -61,8 +65,20 @@ const SideNavbar: React.FC = () => {
   return (
     <div className="w-64 bg-white h-screen shadow-lg flex flex-col flex-shrink-0">
       {/* App Title */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-200 flex-shrink-0">
+      <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 flex-shrink-0">
         <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
+        
+        {/* Close Button - Mobile Only */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* User Profile */}

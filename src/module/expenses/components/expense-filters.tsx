@@ -27,7 +27,7 @@ const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({
   const selectedCategoryData = categories.find(cat => cat.id === selectedCategory);
 
   return (
-    <div className={`flex gap-4 ${className}`}>
+    <div className={`flex flex-col sm:flex-row gap-4 ${className}`}>
       {/* Category Filter */}
       <div className="relative flex-1">
         <button

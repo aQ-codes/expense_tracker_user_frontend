@@ -36,7 +36,7 @@ const DailyBreakdownChart: React.FC<DailyBreakdownChartProps> = ({
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="text-sm text-gray-600">Date: {label}</p>
           <p className="text-sm font-semibold text-purple-600">
-            Amount: ${payload[0].value.toLocaleString()}
+            Amount: ₹{payload[0].value.toLocaleString()}
           </p>
         </div>
       );
@@ -69,7 +69,7 @@ const DailyBreakdownChart: React.FC<DailyBreakdownChartProps> = ({
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) => `₹${value}`}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line 

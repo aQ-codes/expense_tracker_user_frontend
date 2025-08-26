@@ -32,7 +32,7 @@ const ExpenseLineChart: React.FC<ExpenseLineChartProps> = ({
           </p>
           {/* Debug info */}
           <p className="text-xs text-gray-400 mt-1">
-            Data points: {data.length} | Total amount: ${data.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
+            Data points: {data.length} | Total amount: ₹{data.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
           </p>
         </div>
         <button 

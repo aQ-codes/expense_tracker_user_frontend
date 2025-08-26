@@ -11,7 +11,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Auth Form */}
-      <div className="w-[45%] bg-gradient-to-b from-white to-gray-50 flex flex-col justify-center px-12 relative">
+      <div className="w-full lg:w-[45%] bg-gradient-to-b from-white to-gray-50 flex flex-col justify-center px-6 lg:px-12 relative">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-gray-100/30 opacity-40"></div>
         
@@ -24,7 +24,7 @@ export default function AuthLayout({
       </div>
 
       {/* Right Panel - Images and Decorative Elements */}
-      <div className="w-[55%] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      <div className="hidden lg:block w-[55%] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
         {/* Modern geometric background elements */}
         <div className="absolute inset-0">
           {/* Floating geometric shapes with modern gradients */}

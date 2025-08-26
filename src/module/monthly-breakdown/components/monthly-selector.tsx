@@ -34,14 +34,14 @@ const MonthlySelector: React.FC<MonthlySelectorProps> = ({
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex items-center justify-between">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">Monthly Breakdown</h2>
           <p className="text-gray-600 mt-1">View your expenses for a specific month</p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
           {/* Month Selector */}
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Month:</label>

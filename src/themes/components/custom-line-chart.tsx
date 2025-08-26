@@ -35,7 +35,7 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
             {label ? formatDateForDisplay(label) : 'Unknown Date'}
           </p>
           <p className="text-sm text-gray-600">
-            Amount: <span className="text-sm font-medium text-gray-900">${payload[0].value.toLocaleString()}</span>
+            Amount: <span className="text-sm font-medium text-gray-900">₹{payload[0].value.toLocaleString()}</span>
           </p>
         </div>
       );
@@ -73,7 +73,7 @@ const CustomLineChart: React.FC<CustomLineChartProps> = ({
             stroke="none"
             axisLine={false}
             tickLine={false}
-            tickFormatter={(value) => `$${value}`}
+            tickFormatter={(value) => `₹${value}`}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area 

@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useAuthService } from '@/module/auth/services/auth-service';
 import ToastNotification from './toast-notification';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const router = useRouter();
   const { logout } = useAuthService();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -79,25 +83,43 @@ const Header: React.FC = () => {
         position="top-right"
       />
       
-      <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-3 w-full flex-shrink-0 h-16 flex items-center">
-        <div className="flex items-center justify-end w-full">
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className={`flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 ${
-              isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {isLoggingOut ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-2"></div>
-            ) : (
-              <LogoutIcon />
-            )}
-            <span className="font-medium">
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
-            </span>
-          </button>
+      <header className="bg-white shadow-sm border-b border-gray-200 px-4 lg:px-6 py-3 w-full flex-shrink-0 h-16 flex items-center">
+        <div className="flex items-center justify-between w-full">
+          {/* Left Side - Mobile Menu Button and App Title */}
+          <div className="flex items-center">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* App Title - Mobile Only */}
+            <h1 className="text-lg font-bold text-gray-900 lg:hidden ml-2">Expense Tracker</h1>
+          </div>
+
+          {/* Right Side - Logout Button */}
+          <div className="flex items-center">
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className={`flex items-center px-3 lg:px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 ${
+                isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {isLoggingOut ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-2"></div>
+              ) : (
+                <LogoutIcon />
+              )}
+              <span className="font-medium hidden sm:inline">
+                {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </span>
+            </button>
+          </div>
         </div>
       </header>
     </>

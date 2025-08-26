@@ -32,7 +32,7 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
           <p className="font-semibold text-gray-900">{data.name}</p>
           <p className="text-sm text-gray-600">
-            Amount: <span className="font-medium">${data.value.toLocaleString()}</span>
+            Amount: <span className="font-medium">₹{data.value.toLocaleString()}</span>
           </p>
           <p className="text-sm text-gray-600">
             Percentage: <span className="font-medium">{percentage}%</span>
@@ -97,7 +97,7 @@ const CustomPieChart: React.FC<CustomPieChartProps> = ({
           <div className="text-center">
             <p className="text-sm text-gray-600 font-medium">Total</p>
             <p className="text-xl font-bold text-gray-900">
-              ${total.toLocaleString()}
+              ₹{total.toLocaleString()}
             </p>
           </div>
         </div>

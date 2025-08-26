@@ -109,7 +109,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
 
           {/* Amount */}
           <span className="text-red-600 font-semibold mr-2">
-            - ${expense.amount.toLocaleString()}
+            - ₹{expense.amount.toLocaleString()}
           </span>
 
           {/* Edit Button */}
@@ -165,7 +165,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({
           {/* Amount */}
           <div className="bg-red-50 border border-red-200 rounded-full px-3 py-1">
             <span className="text-red-600 font-medium text-sm">
-              -${expense.amount.toLocaleString()}
+              -₹{expense.amount.toLocaleString()}
             </span>
           </div>
 

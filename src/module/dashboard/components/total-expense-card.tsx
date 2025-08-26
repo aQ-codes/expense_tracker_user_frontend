@@ -16,7 +16,7 @@ const TotalExpenseCard: React.FC<TotalExpenseCardProps> = ({
         <div>
           <p className="text-sm text-gray-600 mb-1">Lifetime Expenses</p>
           <p className="text-2xl font-bold text-gray-900">
-            ${amount.toLocaleString()}
+            ₹{amount.toLocaleString()}
           </p>
         </div>
         <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
